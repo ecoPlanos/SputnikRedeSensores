@@ -2,6 +2,9 @@
 
 git operations
 
+Para adicionar novo repositório ao computador:
+git clone "endereço do repositório"
+
 Para trabalhar numa versão actualizada:
 git pull
 
