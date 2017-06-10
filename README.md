@@ -3,7 +3,7 @@
 git operations
 
 Para adicionar novo repositório ao computador:
-git clone "endereço do repositório"
+git clone "endereço do repositório (selecionar ssh)"
 
 Para trabalhar numa versão actualizada:
 git pull
