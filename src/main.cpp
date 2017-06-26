@@ -1,184 +1,102 @@
-// Copyright (c) 2017 by ecoPlanos. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#include <SdFat.h>
-#include <SdFatUtil.h>  // define FreeRam()
+/*
+  Web Server
 
-#define SD_CHIP_SELECT  SS  // SD chip select pin
-#define USE_DS1307       0  // set nonzero to use DS1307 RTC
-#define LOG_INTERVAL  1000  // mills between entries
-#define SENSOR_COUNT     3  // number of analog pins to log
-#define ECHO_TO_SERIAL   1  // echo data to serial port if nonzero
-#define WAIT_TO_START    1  // Wait for serial input in setup()
-#define ADC_DELAY       10  // ADC delay for high impedence sensors
+ A simple web server that shows the value of the analog input pins.
+ using an Arduino Wiznet Ethernet shield.
 
-// file system object
-SdFat sd;
+ Circuit:
+ * Ethernet shield attached to pins 10, 11, 12, 13
+ * Analog inputs attached to pins A0 through A5 (optional)
 
-// text file for logging
-ofstream logfile;
+ created 18 Dec 2009
+ by David A. Mellis
+ modified 9 Apr 2012
+ by Tom Igoe
+ modified 02 Sept 2015
+ by Arturo Guadalupi
 
-// Serial print stream
-ArduinoOutStream cout(Serial);
+ */
 
-// buffer to format data - makes it eaiser to echo to Serial
-char buf[80];
-//------------------------------------------------------------------------------
-#if SENSOR_COUNT > 6
-#error SENSOR_COUNT too large
-#endif  // SENSOR_COUNT
-//------------------------------------------------------------------------------
-// store error strings in flash to save RAM
-#define error(s) sd.errorHalt_P(PSTR(s))
-//------------------------------------------------------------------------------
-#if USE_DS1307
-// use RTClib from Adafruit
-// https://github.com/adafruit/RTClib
+#include "Arduino.h"
+#include <SPI.h>
+#include <Ethernet.h>
 
-// The Arduino IDE has a bug that causes Wire and RTClib to be loaded even
-// if USE_DS1307 is false.
+// Enter a MAC address and IP address for your controller below.
+// The IP address will be dependent on your local network:
+byte mac[] = {
+  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
+};
+IPAddress ip(192, 168, 2, 177);
 
-#error remove this line and uncomment the next two lines.
-//#include <Wire.h>
-//#include <RTClib.h>
-RTC_DS1307 RTC;  // define the Real Time Clock object
-//------------------------------------------------------------------------------
-// call back for file timestamps
-void dateTime(uint16_t* date, uint16_t* time) {
-    DateTime now = RTC.now();
+// Initialize the Ethernet server library
+// with the IP address and port you want to use
+// (port 80 is default for HTTP):
+EthernetServer server(80);
 
-  // return date using FAT_DATE macro to format fields
-  *date = FAT_DATE(now.year(), now.month(), now.day());
-
-  // return time using FAT_TIME macro to format fields
-  *time = FAT_TIME(now.hour(), now.minute(), now.second());
-}
-//------------------------------------------------------------------------------
-// format date/time
-ostream& operator << (ostream& os, DateTime& dt) {
-  os << dt.year() << '/' << int(dt.month()) << '/' << int(dt.day()) << ',';
-  os << int(dt.hour()) << ':' << setfill('0') << setw(2) << int(dt.minute());
-  os << ':' << setw(2) << int(dt.second()) << setfill(' ');
-  return os;
-}
-#endif  // USE_DS1307
-//------------------------------------------------------------------------------
 void setup() {
+  // Open serial communications and wait for port to open:
   Serial.begin(9600);
-  while (!Serial){}  // wait for Leonardo
-
-  // pstr stores strings in flash to save RAM
-  cout << endl << pstr("FreeRam: ") << FreeRam() << endl;
-
-#if WAIT_TO_START
-  cout << pstr("Type any character to start\n");
-  while (Serial.read() <= 0) {}
-  delay(400);  // catch Due reset problem
-#endif  // WAIT_TO_START
-
-#if USE_DS1307
-  // connect to RTC
-  Wire.begin();
-  if (!RTC.begin()) error("RTC failed");
-
-  // set date time callback function
-  SdFile::dateTimeCallback(dateTime);
-  DateTime now = RTC.now();
-  cout  << now << endl;
-#endif  // USE_DS1307
-
-  // initialize the SD card at SPI_HALF_SPEED to avoid bus errors with
-  if (!sd.begin(SD_CHIP_SELECT, SPI_HALF_SPEED)) sd.initErrorHalt();
-
-  // create a new file in root, the current working directory
-  char name[] = "LOGGER00.CSV";
-
-  for (uint8_t i = 0; i < 100; i++) {
-    name[6] = i/10 + '0';
-    name[7] = i%10 + '0';
-    if (sd.exists(name)) continue;
-    logfile.open(name);
-    break;
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
   }
-  if (!logfile.is_open()) error("file.open");
 
-  cout << pstr("Logging to: ") << name << endl;
-  cout << pstr("Type any character to stop\n\n");
 
-  // format header in buffer
-  obufstream bout(buf, sizeof(buf));
-
-  bout << pstr("millis");
-
-#if USE_DS1307
-  bout << pstr(",date,time");
-#endif  // USE_DS1307
-
-  for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
-    bout << pstr(",sens") << int(i);
-  }
-  logfile << buf << endl;
-
-#if ECHO_TO_SERIAL
-  cout << buf << endl;
-#endif  // ECHO_TO_SERIAL
+  // start the Ethernet connection and the server:
+  Ethernet.begin(mac, ip);
+  server.begin();
+  Serial.print("server is at ");
+  Serial.println(Ethernet.localIP());
 }
-//------------------------------------------------------------------------------
+
+
 void loop() {
-  uint32_t m;
-
-  // wait for time to be a multiple of interval
-  do {
-    m = millis();
-  } while (m % LOG_INTERVAL);
-
-  // use buffer stream to format line
-  obufstream bout(buf, sizeof(buf));
-
-  // start with time in millis
-  bout << m;
-
-#if USE_DS1307
-  DateTime now = RTC.now();
-  bout << ',' << now;
-#endif  // USE_DS1307
-
-  // read analog pins and format data
-  for (uint8_t ia = 0; ia < SENSOR_COUNT; ia++) {
-#if ADC_DELAY
-    analogRead(ia);
-    delay(ADC_DELAY);
-#endif  // ADC_DELAY
-    bout << ',' << analogRead(ia);
+  // listen for incoming clients
+  EthernetClient client = server.available();
+  if (client) {
+    Serial.println("new client");
+    // an http request ends with a blank line
+    boolean currentLineIsBlank = true;
+    while (client.connected()) {
+      if (client.available()) {
+        char c = client.read();
+        Serial.write(c);
+        // if you've gotten to the end of the line (received a newline
+        // character) and the line is blank, the http request has ended,
+        // so you can send a reply
+        if (c == '\n' && currentLineIsBlank) {
+          // send a standard http response header
+          client.println("HTTP/1.1 200 OK");
+          client.println("Content-Type: text/html");
+          client.println("Connection: close");  // the connection will be closed after completion of the response
+          client.println("Refresh: 5");  // refresh the page automatically every 5 sec
+          client.println();
+          client.println("<!DOCTYPE HTML>");
+          client.println("<html>");
+          // output the value of each analog input pin
+          for (int analogChannel = 0; analogChannel < 1; analogChannel++) {
+            int sensorReading = analogRead(analogChannel);
+            client.print("analog input ");
+            client.print(analogChannel);
+            client.print(" is ");
+            client.print(sensorReading);
+            client.println("<br />");
+          }
+          client.println("</html>");
+          break;
+        }
+        if (c == '\n') {
+          // you're starting a new line
+          currentLineIsBlank = true;
+        } else if (c != '\r') {
+          // you've gotten a character on the current line
+          currentLineIsBlank = false;
+        }
+      }
+    }
+    // give the web browser time to receive the data
+    delay(1);
+    // close the connection:
+    client.stop();
+    Serial.println("client disconnected");
   }
-  bout << endl;
-
-  // log data and flush to SD
-  logfile << buf << flush;
-
-  // check for error
-  if (!logfile) error("write data failed");
-
-#if ECHO_TO_SERIAL
-  cout << buf;
-#endif  // ECHO_TO_SERIAL
-
-  // don't log two points in the same millis
-  if (m == millis()) delay(1);
-
-  if (!Serial.available()) return;
-  logfile.close();
-  cout << pstr("Done!");
-  while (1);
 }

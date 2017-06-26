@@ -16,3 +16,6 @@ git commit
 
 Para aprovar a actualização no repositório:
 git push
+
+Arduino (Platformio)
+platformio run --target upload --upload-port /dev/ttyACM0 -e due
