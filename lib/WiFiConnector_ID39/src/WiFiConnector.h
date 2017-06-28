@@ -88,11 +88,11 @@ public:
     static WiFiConnector* instance()
     {
       static WiFiConnector *s_instance = NULL;
-      Serial.printf("addr: %x\r\n", s_instance);
+      //Serial.printf("addr: %x\r\n", s_instance);
       if (!s_instance) {
         s_instance = new WiFiConnector;
       }
-      Serial.printf("addr: %x\r\n", s_instance);
+      //Serial.printf("addr: %x\r\n", s_instance);
       return s_instance;
     }
 

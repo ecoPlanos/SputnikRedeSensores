@@ -1,0 +1,29 @@
+{
+    "name": "ESP8266RestClient", 
+    "repository": {
+        "url": "https://github.com/fabianofranca/ESP8266RestClient.git", 
+        "type": "git"
+    }, 
+    "platforms": [
+        "espressif8266"
+    ], 
+    "frameworks": [
+        "arduino"
+    ], 
+    "version": "6b4b7dabee", 
+    "authors": [
+        {
+            "url": "https://github.com/fabianofranca", 
+            "maintainer": false, 
+            "email": null, 
+            "name": "Fabiano Franca"
+        }
+    ], 
+    "keywords": [
+        "restful", 
+        "esp8266", 
+        "rest"
+    ], 
+    "id": 303, 
+    "description": "ESP8266 RESTful HTTP Request Library"
+}

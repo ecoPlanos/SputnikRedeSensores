@@ -8,7 +8,7 @@
 # The result can be seen every ~1.5 seconds by using the Serial Monitor
 #
 */
-#include <Arduino.h>
+
 #include <ST_HW_HC_SR04.h>
 
 // Change the pins if you wish.
@@ -22,14 +22,8 @@ void setup() {
 
 void loop() {
     int hitTime = ultrasonicSensor.getHitTime(); // In microseconds
-    delay(60);
-    unsigned int echoDuration = ultrasonicSensor.getEchoDur(); // In microseconds
-    delay(60);
-    double distance = ultrasonicSensor.getDistance(); // In meters
 
-    String message = "Hit time: " + String(hitTime) + " microseconds\n" +
-                     "Signal travel time: " + String(echoDuration) + " microseconds\n" +
-                     "Distance: " + String(distance) + " meters\n";
+    String message = "The hit time was " + String(hitTime) + " microseconds\n";
 
     /*
     #

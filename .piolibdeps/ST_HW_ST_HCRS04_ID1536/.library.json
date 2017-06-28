@@ -1,0 +1,46 @@
+{
+    "description": "Advanced arduino library for HC-SR04 ultrasonic sensors.", 
+    "repository": {
+        "url": "https://github.com/Spaguetron/ST_HW_HC_SR04", 
+        "type": "git"
+    }, 
+    "platforms": [
+        "atmelavr", 
+        "atmelsam", 
+        "espressif8266", 
+        "intel_arc32", 
+        "microchippic32", 
+        "nordicnrf51", 
+        "teensy", 
+        "timsp430"
+    ], 
+    "export": {
+        "exclude": [
+            "extras", 
+            "docs", 
+            "tests", 
+            "test", 
+            "*.doxyfile", 
+            "*.pdf"
+        ], 
+        "include": null
+    }, 
+    "authors": [
+        {
+            "maintainer": true, 
+            "name": "Fl\u00e1vio Monteiro", 
+            "url": null, 
+            "email": "flaviomonteiro2013@gmail.com"
+        }
+    ], 
+    "keywords": [
+        "sensors"
+    ], 
+    "id": 1536, 
+    "name": "ST_HW_ST_HCRS04", 
+    "frameworks": [
+        "arduino"
+    ], 
+    "version": "2.0.2", 
+    "homepage": null
+}
