@@ -1,61 +1,152 @@
-/*
-#
-# GetHitTime.ino - ST_HW_HC_SR04 v2.0 library example
-#
-#   This code shows you how to get the elapsed time the ultrasonic pulses sent
-# by the sensor take from the HC-SR04 location to a blocking object (e.g. wall)
-#
-# The result can be seen every ~1.5 seconds by using the Serial Monitor
-#
-*/
-#include <Arduino.h>
-#include <ST_HW_HC_SR04.h>
+// DHT Temperature & Humidity Sensor
+// Unified Sensor Library Example
+// Written by Tony DiCola for Adafruit Industries
+// Released under an MIT license.
 
-// Change the pins if you wish.
-ST_HW_HC_SR04 ultrasonicSensor(13, 12); // ST_HW_HC_SR04(TRIG, ECHO)
+// Depends on the following Arduino libraries:
+// - Adafruit Unified Sensor Library: https://github.com/adafruit/Adafruit_Sensor
+// - DHT Sensor Library: https://github.com/adafruit/DHT-sensor-library
+
+#include <Adafruit_Sensor.h>
+#include <DHT.h>
+#include <DHT_U.h>
+#include <Wire.h>
+#include "Adafruit_SHT31.h"
+#include "SputinkRedeSensores.h"
+
+#define DHT11_PIN            53         // Pin which is connected to the DHT sensor.
+#define DHT22_PIN            52         // Pin which is connected to the DHT sensor.
+
+// See guide for details on sensor wiring and usage:
+//   https://learn.adafruit.com/dht/overview
+
+DHT_Unified dht11(DHT11_PIN, DHT11);
+DHT_Unified dht22(DHT22_PIN, DHT22);
+Adafruit_SHT31 sht31 = Adafruit_SHT31();
+
+uint32_t delayMS;
 
 void setup() {
-    Serial.begin(9600);
+  Serial.begin(9600);
+  // Initialize DHTs.
+  dht11.begin();
+  dht22.begin();
+  sensor_t sensorDHT11, sensorDHT22;
+  dht11.temperature().getSensor(&sensorDHT11);
+  Serial.println("------------------------------------");
+  Serial.println("Temperature DHT11");
+  Serial.print  ("Sensor:       "); Serial.println(sensorDHT11.name);
+  Serial.print  ("Driver Ver:   "); Serial.println(sensorDHT11.version);
+  Serial.print  ("Unique ID:    "); Serial.println(sensorDHT11.sensor_id);
+  Serial.print  ("Max Value:    "); Serial.print(sensorDHT11.max_value); Serial.println(" *C");
+  Serial.print  ("Min Value:    "); Serial.print(sensorDHT11.min_value); Serial.println(" *C");
+  Serial.print  ("Resolution:   "); Serial.print(sensorDHT11.resolution); Serial.println(" *C");
+  Serial.println("------------------------------------");
+  dht11.humidity().getSensor(&sensorDHT11);
+  Serial.println("------------------------------------");
+  Serial.println("Humidity DHT11");
+  Serial.print  ("Sensor:       "); Serial.println(sensorDHT11.name);
+  Serial.print  ("Driver Ver:   "); Serial.println(sensorDHT11.version);
+  Serial.print  ("Unique ID:    "); Serial.println(sensorDHT11.sensor_id);
+  Serial.print  ("Max Value:    "); Serial.print(sensorDHT11.max_value); Serial.println("%");
+  Serial.print  ("Min Value:    "); Serial.print(sensorDHT11.min_value); Serial.println("%");
+  Serial.print  ("Resolution:   "); Serial.print(sensorDHT11.resolution); Serial.println("%");
+  Serial.println("------------------------------------");
+  dht22.temperature().getSensor(&sensorDHT22);
+  Serial.println("------------------------------------");
+  Serial.println("Temperature DHT22");
+  Serial.print  ("Sensor:       "); Serial.println(sensorDHT22.name);
+  Serial.print  ("Driver Ver:   "); Serial.println(sensorDHT22.version);
+  Serial.print  ("Unique ID:    "); Serial.println(sensorDHT22.sensor_id);
+  Serial.print  ("Max Value:    "); Serial.print(sensorDHT22.max_value); Serial.println(" *C");
+  Serial.print  ("Min Value:    "); Serial.print(sensorDHT22.min_value); Serial.println(" *C");
+  Serial.print  ("Resolution:   "); Serial.print(sensorDHT22.resolution); Serial.println(" *C");
+  Serial.println("------------------------------------");
+  dht11.humidity().getSensor(&sensorDHT11);
+  Serial.println("------------------------------------");
+  Serial.println("Humidity DHT22");
+  Serial.print  ("Sensor:       "); Serial.println(sensorDHT22.name);
+  Serial.print  ("Driver Ver:   "); Serial.println(sensorDHT22.version);
+  Serial.print  ("Unique ID:    "); Serial.println(sensorDHT22.sensor_id);
+  Serial.print  ("Max Value:    "); Serial.print(sensorDHT22.max_value); Serial.println("%");
+  Serial.print  ("Min Value:    "); Serial.print(sensorDHT22.min_value); Serial.println("%");
+  Serial.print  ("Resolution:   "); Serial.print(sensorDHT22.resolution); Serial.println("%");
+  Serial.println("------------------------------------");
+  //Initialize SHT31
+  if (! sht31.begin(0x44)) {   // Set to 0x45 for alternate i2c addr
+    Serial.println("Couldn't find SHT31");
+    //while (1) delay(1);
+  }
 
-    while(!Serial); // Wait for the Serial connection;
+  // Set delay between sensor readings based on sensor details.
+  delayMS = sensorDHT11.min_delay / 1000;
+  delayMS = (sensorDHT22.min_delay / 1000 > delayMS)  ? (sensorDHT22.min_delay / 1000)  : delayMS;
+  delayMS = (SENSORS_READ_INTERVAL > delayMS) ? SENSORS_READ_INTERVAL : delayMS;
 }
 
 void loop() {
-    int hitTime = ultrasonicSensor.getHitTime(); // In microseconds
-    delay(60);
-    unsigned int echoDuration = ultrasonicSensor.getEchoDur(); // In microseconds
-    delay(60);
-    double distance = ultrasonicSensor.getDistance(); // In meters
+  // Delay between measurements.
+  delay(delayMS);
+  // Get temperature event and print its value.
+  sensors_event_t event11, event22;
+  dht11.temperature().getEvent(&event11);
+  if (isnan(event11.temperature)) {
+    Serial.println("Error reading DHT11 temperature!");
+  }
+  else {
+    Serial.print("Temperature DHT11: ");
+    Serial.print(event11.temperature);
+    Serial.println(" *C");
+  }
+  // Get humidity event and print its value.
+  dht11.humidity().getEvent(&event11);
+  if (isnan(event11.relative_humidity)) {
+    Serial.println("Error reading DHT11 humidity!");
+  }
+  else {
+    Serial.print("Humidity DHT11: ");
+    Serial.print(event11.relative_humidity);
+    Serial.println("%");
+  }
+  dht22.temperature().getEvent(&event22);
+  if (isnan(event22.temperature)) {
+    Serial.println("Error reading DHT22 temperature!");
+  }
+  else {
+    Serial.print("Temperature DHT22: ");
+    Serial.print(event22.temperature);
+    Serial.println(" *C");
+  }
+  // Get humidity event and print its value.
+  dht22.humidity().getEvent(&event22);
+  if (isnan(event22.relative_humidity)) {
+    Serial.println("Error reading DHT22 humidity!");
+  }
+  else {
+    Serial.print("Humidity DHT22: ");
+    Serial.print(event22.relative_humidity);
+    Serial.println("%");
+  }
 
-    String message = "Hit time: " + String(hitTime) + " microseconds\n" +
-                     "Signal travel time: " + String(echoDuration) + " microseconds\n" +
-                     "Distance: " + String(distance) + " meters\n";
+  float t = sht31.readTemperature();
+  float h = sht31.readHumidity();
 
-    /*
-    #
-    # This means the sensor didn't receive back the packets before the timeout
-    #
-    #   That usually happens when the distance between the sensor and the block-
-    # ing object is greater than 86 centimeters (33.85 inches).
-    #
-    #   Increasing the timeout from 5000 microseconds to 23200 microseconds
-    # will increase the maximum distance to ~4m, at the cost of the code being
-    # stuck for 23.2 ms if no packet is received during this period (worst case
-    # scenario).
-    #
-    #   More information (including calculations) is included in the
-    # extras/HC-SR04.txt file. (Inside your libraries/ST_HW_HC_SR04 folder)
-    #
-    */
-    if((hitTime == 0) && (ultrasonicSensor.getTimeout() == 5000)) {
-        ultrasonicSensor.setTimeout(23200);
+  if (! isnan(t)) {  // check if 'is not a number'
+    Serial.print("Temperature SHT31: ");
+    Serial.print(t);
+    Serial.println(" *C");
 
-        message += "[!] Timeout increased from 5000 to 23200\n";
-        message += "[!] If the hit time is still 0 after this message, "
-            "please check your wiring!\n";
-    }
+  } else {
+    Serial.println("Error reading SHT31 temperature!");
+  }
 
-    Serial.print(message);
-
-    delay(1500); // Delay 1500ms (1.5s)
+  if (! isnan(h)) {  // check if 'is not a number'
+    Serial.print("Humidity SHT31: ");
+    Serial.print(h);
+    Serial.println("%");
+  } else {
+    Serial.println("Error reading SHT31 humidity!");
+  }
+  Serial.println("------------------------------------");
+  delay(1000);
 }
