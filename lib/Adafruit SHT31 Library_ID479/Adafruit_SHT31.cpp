@@ -1,16 +1,16 @@
-/*************************************************** 
+/***************************************************
   This is a library for the SHT31 Digital Humidity & Temp Sensor
 
   Designed specifically to work with the SHT31 Digital sensor from Adafruit
   ----> https://www.adafruit.com/products/2857
 
-  These displays use I2C to communicate, 2 pins are required to  
+  These displays use I2C to communicate, 2 pins are required to
   interface
-  Adafruit invests time and resources providing this open source code, 
-  please support Adafruit and open-source hardware by purchasing 
+  Adafruit invests time and resources providing this open source code,
+  please support Adafruit and open-source hardware by purchasing
   products from Adafruit!
 
-  Written by Limor Fried/Ladyada for Adafruit Industries.  
+  Written by Limor Fried/Ladyada for Adafruit Industries.
   BSD license, all text above must be included in any redistribution
  ****************************************************/
 
@@ -57,7 +57,7 @@ float Adafruit_SHT31::readTemperature(void) {
 
   return temp;
 }
-  
+
 
 float Adafruit_SHT31::readHumidity(void) {
   if (! readTempHum()) return NAN;
@@ -70,10 +70,10 @@ boolean Adafruit_SHT31::readTempHum(void) {
   uint8_t readbuffer[6];
 
   writeCommand(SHT31_MEAS_HIGHREP);
-  
+
   delay(500);
   Wire.requestFrom(_i2caddr, (uint8_t)6);
-  if (Wire.available() != 6) 
+  if (Wire.available() != 6)
     return false;
   for (uint8_t i=0; i<6; i++) {
     readbuffer[i] = Wire.read();
@@ -98,14 +98,14 @@ boolean Adafruit_SHT31::readTempHum(void) {
   stemp /= 0xffff;
   stemp = -45 + stemp;
   temp = stemp;
-  
+
 //  Serial.print("SRH = "); Serial.println(SRH);
   double shum = SRH;
   shum *= 100;
   shum /= 0xFFFF;
-  
+
   humidity = shum;
-  
+
   return true;
 }
 
@@ -113,7 +113,7 @@ void Adafruit_SHT31::writeCommand(uint16_t cmd) {
   Wire.beginTransmission(_i2caddr);
   Wire.write(cmd >> 8);
   Wire.write(cmd & 0xFF);
-  Wire.endTransmission();  
+  Wire.endTransmission();
 }
 
 uint8_t Adafruit_SHT31::crc8(const uint8_t *data, int len)
@@ -131,7 +131,7 @@ uint8_t Adafruit_SHT31::crc8(const uint8_t *data, int len)
 
   const uint8_t POLYNOMIAL(0x31);
   uint8_t crc(0xFF);
-  
+
   for ( int j = len; j; --j ) {
       crc ^= *data++;
 

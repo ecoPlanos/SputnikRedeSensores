@@ -7,15 +7,20 @@
 // - Adafruit Unified Sensor Library: https://github.com/adafruit/Adafruit_Sensor
 // - DHT Sensor Library: https://github.com/adafruit/DHT-sensor-library
 
+#include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 #include <DHT_U.h>
-#include <Wire.h>
-#include "Adafruit_SHT31.h"
-#include "SputinkRedeSensores.h"
-
+#include <Adafruit_SHT31.h>
+#include <Sensirion.h>    //SHT75
+#include <Adafruit_MLX90614.h>
+//#include "SputinkRedeSensores.h"
+#define INITIAL_DELAY 100
+#define SENSORS_READ_INTERVAL 10000 //Sensors read minimum interval (ms)
 #define DHT11_PIN            53         // Pin which is connected to the DHT sensor.
 #define DHT22_PIN            52         // Pin which is connected to the DHT sensor.
+#define SHT75_DATA           50         //
+#define SHT75_SCK            51         //
 
 // See guide for details on sensor wiring and usage:
 //   https://learn.adafruit.com/dht/overview
@@ -23,55 +28,24 @@
 DHT_Unified dht11(DHT11_PIN, DHT11);
 DHT_Unified dht22(DHT22_PIN, DHT22);
 Adafruit_SHT31 sht31 = Adafruit_SHT31();
-
+Sensirion sht75(SHT75_DATA, SHT75_SCK);
+Adafruit_MLX90614 mlx = Adafruit_MLX90614();
 uint32_t delayMS;
 
 void setup() {
   Serial.begin(9600);
+  delay(INITIAL_DELAY);
   // Initialize DHTs.
   dht11.begin();
   dht22.begin();
   sensor_t sensorDHT11, sensorDHT22;
   dht11.temperature().getSensor(&sensorDHT11);
   Serial.println("------------------------------------");
-  Serial.println("Temperature DHT11");
-  Serial.print  ("Sensor:       "); Serial.println(sensorDHT11.name);
-  Serial.print  ("Driver Ver:   "); Serial.println(sensorDHT11.version);
-  Serial.print  ("Unique ID:    "); Serial.println(sensorDHT11.sensor_id);
-  Serial.print  ("Max Value:    "); Serial.print(sensorDHT11.max_value); Serial.println(" *C");
-  Serial.print  ("Min Value:    "); Serial.print(sensorDHT11.min_value); Serial.println(" *C");
-  Serial.print  ("Resolution:   "); Serial.print(sensorDHT11.resolution); Serial.println(" *C");
-  Serial.println("------------------------------------");
-  dht11.humidity().getSensor(&sensorDHT11);
-  Serial.println("------------------------------------");
-  Serial.println("Humidity DHT11");
-  Serial.print  ("Sensor:       "); Serial.println(sensorDHT11.name);
-  Serial.print  ("Driver Ver:   "); Serial.println(sensorDHT11.version);
-  Serial.print  ("Unique ID:    "); Serial.println(sensorDHT11.sensor_id);
-  Serial.print  ("Max Value:    "); Serial.print(sensorDHT11.max_value); Serial.println("%");
-  Serial.print  ("Min Value:    "); Serial.print(sensorDHT11.min_value); Serial.println("%");
-  Serial.print  ("Resolution:   "); Serial.print(sensorDHT11.resolution); Serial.println("%");
-  Serial.println("------------------------------------");
-  dht22.temperature().getSensor(&sensorDHT22);
-  Serial.println("------------------------------------");
-  Serial.println("Temperature DHT22");
-  Serial.print  ("Sensor:       "); Serial.println(sensorDHT22.name);
-  Serial.print  ("Driver Ver:   "); Serial.println(sensorDHT22.version);
-  Serial.print  ("Unique ID:    "); Serial.println(sensorDHT22.sensor_id);
-  Serial.print  ("Max Value:    "); Serial.print(sensorDHT22.max_value); Serial.println(" *C");
-  Serial.print  ("Min Value:    "); Serial.print(sensorDHT22.min_value); Serial.println(" *C");
-  Serial.print  ("Resolution:   "); Serial.print(sensorDHT22.resolution); Serial.println(" *C");
-  Serial.println("------------------------------------");
-  dht11.humidity().getSensor(&sensorDHT11);
-  Serial.println("------------------------------------");
-  Serial.println("Humidity DHT22");
-  Serial.print  ("Sensor:       "); Serial.println(sensorDHT22.name);
-  Serial.print  ("Driver Ver:   "); Serial.println(sensorDHT22.version);
-  Serial.print  ("Unique ID:    "); Serial.println(sensorDHT22.sensor_id);
-  Serial.print  ("Max Value:    "); Serial.print(sensorDHT22.max_value); Serial.println("%");
-  Serial.print  ("Min Value:    "); Serial.print(sensorDHT22.min_value); Serial.println("%");
-  Serial.print  ("Resolution:   "); Serial.print(sensorDHT22.resolution); Serial.println("%");
-  Serial.println("------------------------------------");
+  Serial.println("");
+  Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
+
+  Serial.println();
+  delay(500);
   //Initialize SHT31
   if (! sht31.begin(0x44)) {   // Set to 0x45 for alternate i2c addr
     Serial.println("Couldn't find SHT31");
@@ -79,22 +53,24 @@ void setup() {
   }
 
   // Set delay between sensor readings based on sensor details.
-  delayMS = sensorDHT11.min_delay / 1000;
-  delayMS = (sensorDHT22.min_delay / 1000 > delayMS)  ? (sensorDHT22.min_delay / 1000)  : delayMS;
+  delayMS = (uint32_t)(sensorDHT11.min_delay / 1000);
+  delayMS = ((uint32_t)(sensorDHT22.min_delay / 1000) > delayMS)  ? ((uint32_t)(sensorDHT22.min_delay / 1000))  : delayMS;
   delayMS = (SENSORS_READ_INTERVAL > delayMS) ? SENSORS_READ_INTERVAL : delayMS;
 }
 
 void loop() {
-  // Delay between measurements.
-  delay(delayMS);
   // Get temperature event and print its value.
+  Serial.println("------------------------------------");
+  Serial.println("----------------T&RH----------------");
+  Serial.println("------------------------------------");
+
   sensors_event_t event11, event22;
   dht11.temperature().getEvent(&event11);
   if (isnan(event11.temperature)) {
     Serial.println("Error reading DHT11 temperature!");
   }
   else {
-    Serial.print("Temperature DHT11: ");
+    Serial.print("DHT11 Temp: ");
     Serial.print(event11.temperature);
     Serial.println(" *C");
   }
@@ -104,7 +80,7 @@ void loop() {
     Serial.println("Error reading DHT11 humidity!");
   }
   else {
-    Serial.print("Humidity DHT11: ");
+    Serial.print("DHT11 RH: ");
     Serial.print(event11.relative_humidity);
     Serial.println("%");
   }
@@ -113,7 +89,7 @@ void loop() {
     Serial.println("Error reading DHT22 temperature!");
   }
   else {
-    Serial.print("Temperature DHT22: ");
+    Serial.print("DHT22 Temp: ");
     Serial.print(event22.temperature);
     Serial.println(" *C");
   }
@@ -123,7 +99,7 @@ void loop() {
     Serial.println("Error reading DHT22 humidity!");
   }
   else {
-    Serial.print("Humidity DHT22: ");
+    Serial.print("DHT22 RH: ");
     Serial.print(event22.relative_humidity);
     Serial.println("%");
   }
@@ -132,7 +108,7 @@ void loop() {
   float h = sht31.readHumidity();
 
   if (! isnan(t)) {  // check if 'is not a number'
-    Serial.print("Temperature SHT31: ");
+    Serial.print("SHT31 Temp: ");
     Serial.print(t);
     Serial.println(" *C");
 
@@ -141,12 +117,53 @@ void loop() {
   }
 
   if (! isnan(h)) {  // check if 'is not a number'
-    Serial.print("Humidity SHT31: ");
+    Serial.print("SHT31 RH: ");
     Serial.print(h);
     Serial.println("%");
   } else {
     Serial.println("Error reading SHT31 humidity!");
   }
+float sht75_temp, sht75_hr, sht75_dewpoint;
+sht75.measure(&sht75_temp, &sht75_hr, &sht75_dewpoint);
+if (! isnan(sht75_temp)) {  // check if 'is not a number'
+    Serial.print("SHT75 Temp: ");
+    Serial.print(sht75_temp);
+    Serial.println(" *C");
+
+  } else {
+    Serial.println("Error reading SHT75 temperature!");
+  }
+
+  if (! isnan(sht75_hr)) {  // check if 'is not a number'
+    Serial.print("SHT75 RH: ");
+    Serial.print(sht75_hr);
+    Serial.println("%");
+  } else {
+    Serial.println("Error reading SHT75 humidity!");
+  }
+  if (! isnan(h)) {  // check if 'is not a number'
+    Serial.print("SHT75 Dewpoint: ");
+    Serial.print(sht75_dewpoint);
+    Serial.println("C");
+  } else {
+    Serial.println("Error reading SHT75 humidity!");
+  }
   Serial.println("------------------------------------");
-  delay(1000);
+  Serial.println("----------------TEMP----------------");
+  Serial.println("------------------------------------");
+  float t_amb = mlx.readAmbientTempC();
+  float t_obj = mlx.readObjectTempC();
+
+  if (! isnan(t)) {  // check if 'is not a number'
+    Serial.print("MLX90614 Ambient Temp: ");
+    Serial.print(t_amb);
+    Serial.println(" *C");
+    Serial.print("MLX90614 Object Temp: ");
+    Serial.print(t_obj);
+    Serial.println(" *C");
+  } else {
+    Serial.println("Error reading MLX90614 temperature!");
+  }
+  // Delay between measurements.
+  delay(delayMS);
 }
