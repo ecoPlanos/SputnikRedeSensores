@@ -1,21 +1,35 @@
-// DHT Temperature & Humidity Sensor
-// Unified Sensor Library Example
-// Written by Tony DiCola for Adafruit Industries
-// Released under an MIT license.
-
-// Depends on the following Arduino libraries:
-// - Adafruit Unified Sensor Library: https://github.com/adafruit/Adafruit_Sensor
-// - DHT Sensor Library: https://github.com/adafruit/DHT-sensor-library
+// Copyright (c) 2017 by ecoPlanos. All Rights Reserved.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wire.h>
+////////////////////
 #include <SPI.h>
 #include <SD.h>
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
+#include <ESP8266WebServer.h>
+#include <ESP8266FtpServer.h>
+////////////////////
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 #include <DHT_U.h>
 #include <Adafruit_SHT31.h>
 #include <Sensirion.h>    //SHT75
+////////////////////
 #include <Adafruit_MLX90614.h>
+////////////////////
 //#include "SputinkRedeSensores.h"
 #define INITIAL_DELAY 100
 // #define SENSORS_READ_INTERVAL 10000 //Sensors read minimum interval (ms)
@@ -32,6 +46,9 @@
 #define LOG_SERIAL
 
 const String log_file_name="datalog.csv";
+
+const char* ssid = "SSID";
+const char* password = "PASS";
 // See guide for details on sensor wiring and usage:
 //   https://learn.adafruit.com/dht/overview
 
@@ -55,7 +72,7 @@ void setup() {
   sys_time = millis();
   sys_time_last = sys_time;
   #ifdef LOG_SERIAL
-  Serial.begin(9600);
+  Serial.begin(115200);
   #endif
   #ifdef LOG_SD
    if (!SD.begin(SD_CHIP_SEL))
