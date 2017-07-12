@@ -71,8 +71,8 @@ class Sensirion
 #endif
 
   public:
-    Sensirion(uint8_t dataPin, uint8_t clockPin);
-    uint8_t measure(float *temp, float *humi, float *dew);   
+    void begin(uint8_t dataPin, uint8_t clockPin);
+    uint8_t measure(float *temp, float *humi, float *dew);
     uint8_t meas(uint8_t cmd, uint16_t *result, bool block);
     uint8_t measRdy(void);
     uint8_t writeSR(uint8_t value);

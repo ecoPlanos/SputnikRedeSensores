@@ -22,7 +22,7 @@
 #else
  #include "WProgram.h"
 #endif
- 
+
 extern "C" {
   // AVR LibC Includes
   #include <stddef.h>
@@ -73,7 +73,7 @@ const bool ACK    = true;
  * Constructors
  ******************************************************************************/
 
-Sensirion::Sensirion(uint8_t dataPin, uint8_t clockPin) {
+void Sensirion::begin(uint8_t dataPin, uint8_t clockPin) {
   // Initialize private storage for library functions
   _pinData = dataPin;
   _pinClock = clockPin;

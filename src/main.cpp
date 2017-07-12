@@ -13,32 +13,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <Wire.h>
+// #include <Wire.h>
 ////////////////////
 #include <SPI.h>
 #include <SD.h>
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266FtpServer.h>
+#include <ESP8266wifi.h>
+// #include <WiFiClient.h>
+// #include <ESP8266WebServer.h>
+// #include <ESP8266FtpServer.h>
 ////////////////////
-#include <Adafruit_Sensor.h>
-#include <DHT.h>
-#include <DHT_U.h>
-#include <Adafruit_SHT31.h>
-#include <Sensirion.h>    //SHT75
-////////////////////
-#include <Adafruit_MLX90614.h>
+#include "SputnikTempRH.h"
+#include "SputnikTemp.h"
 ////////////////////
 //#include "SputinkRedeSensores.h"
 #define INITIAL_DELAY 100
 // #define SENSORS_READ_INTERVAL 10000 //Sensors read minimum interval (ms)
 #define SENSORS_READ_INTERVAL 1000 //Sensors read minimum interval (ms)
-
-#define DHT11_PIN            53         // Pin which is connected to the DHT sensor.
-#define DHT22_PIN            52         // Pin which is connected to the DHT sensor.
-#define SHT75_DATA           50         //
-#define SHT75_SCK            51         //
 
 #define SD_CHIP_SEL          4//10
 
@@ -53,6 +43,7 @@ const char* password = "PASS";
 //   https://learn.adafruit.com/dht/overview
 
 uint32_t sys_time, sys_time_last, setup_time, acquisition_time;
+uint32_t delayMS;
 
 uint8_t sd_present=false;
 
@@ -61,12 +52,10 @@ SdVolume volume;
 SdFile root;
 File log_file;
 
-DHT_Unified dht11(DHT11_PIN, DHT11);
-DHT_Unified dht22(DHT22_PIN, DHT22);
-Adafruit_SHT31 sht31 = Adafruit_SHT31();
-Sensirion sht75(SHT75_DATA, SHT75_SCK);
-Adafruit_MLX90614 mlx = Adafruit_MLX90614();
-uint32_t delayMS;
+DHT dht11, dht22;
+Adafruit_SHT31 sht31;
+Sensirion sht75;
+Adafruit_MLX90614 mlx;
 
 void setup() {
   sys_time = millis();
@@ -92,26 +81,23 @@ void setup() {
   #endif  //ifdef LOG_SD
   delay(INITIAL_DELAY);
   // Initialize DHTs.
-  dht11.begin();
-  dht22.begin();
-  sensor_t sensorDHT11, sensorDHT22;
-  dht11.temperature().getSensor(&sensorDHT11);
+  temp_hr_init();
+  //  Initialize SHT31
+  if (! sht31.begin(0x44)) {   // Set to 0x45 for alternate i2c addr
+    #ifdef LOG_SERIAL
+    Serial.println("Couldn't find SHT31");
+    #endif
+  }
+  //  Initialize MLX90614
+  mlx.begin();
+  //  Print serial header
   #ifdef LOG_SERIAL
   Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
   Serial.println(".i.SputnikRedeSensores by ecoPlanos.i.");
   Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
   Serial.println();
   #endif
-  //Initialize SHT31
-  if (! sht31.begin(0x44)) {   // Set to 0x45 for alternate i2c addr
-    #ifdef LOG_SERIAL
-    Serial.println("Couldn't find SHT31");
-    #endif
-  }
-
-  // Set delay between sensor readings based on sensor details.
-  delayMS = (uint32_t)(sensorDHT11.min_delay / 1000);
-  delayMS = ((uint32_t)(sensorDHT22.min_delay / 1000) > delayMS)  ? ((uint32_t)(sensorDHT22.min_delay / 1000))  : delayMS;
+  //  Set delay between sensor readings based on sensor details.
   delayMS = (SENSORS_READ_INTERVAL > delayMS) ? SENSORS_READ_INTERVAL : delayMS;
   sys_time = micros();
   setup_time = sys_time-sys_time_last;
@@ -131,10 +117,7 @@ void loop() {
   Serial.println("------------------------------------");
   #endif
 
-  sensors_event_t dht11_data, dht22_data;
-  dht11.temperature().getEvent(&dht11_data);
-
-  if (isnan(dht11_data.temperature)) {
+  if (isnan(dht11.readTemperature(false,true))) {
     #ifdef LOG_SERIAL
     Serial.println("Error reading DHT11 temperature!");
     #endif
@@ -143,14 +126,13 @@ void loop() {
   else {
     #ifdef LOG_SERIAL
     Serial.print("DHT11 Temp: ");
-    Serial.print(dht11_data.temperature);
+    Serial.print(dht11.getTemperature());
     Serial.println(" *C");
     #endif
-    sd_data_string+=String(dht11_data.temperature)+",";
+    sd_data_string+=String(dht11.getTemperature())+",";
   }
   // Get humidity event and print its value.
-  dht11.humidity().getEvent(&dht11_data);
-  if (isnan(dht11_data.relative_humidity)) {
+  if (isnan(dht11.readHumidity(true))) {
     #ifdef LOG_SERIAL
     Serial.println("Error reading DHT11 humidity!");
     #endif
@@ -159,13 +141,13 @@ void loop() {
   else {
     #ifdef LOG_SERIAL
     Serial.print("DHT11 RH: ");
-    Serial.print(dht11_data.relative_humidity);
+    Serial.print(dht11.getHumidity());
     Serial.println("%");
     #endif
-    sd_data_string+=String(dht11_data.relative_humidity)+",";
+    sd_data_string+=String(dht11.getHumidity())+",";
   }
-  dht22.temperature().getEvent(&dht22_data);
-  if (isnan(dht22_data.temperature)) {
+
+  if (isnan(dht22.readTemperature(false,true))) {
     #ifdef LOG_SERIAL
     Serial.println("Error reading DHT22 temperature!");
     #endif
@@ -174,14 +156,13 @@ void loop() {
   else {
     #ifdef LOG_SERIAL
     Serial.print("DHT22 Temp: ");
-    Serial.print(dht22_data.temperature);
+    Serial.print(dht11.getTemperature());
     Serial.println(" *C");
     #endif
-    sd_data_string+=String(dht22_data.temperature)+",";
+    sd_data_string+=String(dht22.getTemperature())+",";
   }
   // Get humidity event and print its value.
-  dht22.humidity().getEvent(&dht22_data);
-  if (isnan(dht22_data.relative_humidity)) {
+  if (isnan(dht22.readHumidity(true))) {
     #ifdef LOG_SERIAL
     Serial.println("Error reading DHT22 humidity!");
     #endif
@@ -190,10 +171,10 @@ void loop() {
   else {
     #ifdef LOG_SERIAL
     Serial.print("DHT22 RH: ");
-    Serial.print(dht22_data.relative_humidity);
+    Serial.print(dht22.getHumidity());
     Serial.println("%");
     #endif
-    sd_data_string+=String(dht22_data.relative_humidity)+",";
+    sd_data_string+=String(dht11.getHumidity())+",";
   }
 
   float sht31_temp = sht31.readTemperature();

@@ -29,8 +29,8 @@
 
 class DHT_Unified {
 public:
-  DHT_Unified(uint8_t pin, uint8_t type, uint8_t count=6, int32_t tempSensorId=-1, int32_t humiditySensorId=-1);
-  void begin();
+  DHT_Unified(int32_t tempSensorId=-1, int32_t humiditySensorId=-1);
+  void begin(uint8_t pin, uint8_t type, uint8_t count=6);
 
   class Temperature : public Adafruit_Sensor {
   public:

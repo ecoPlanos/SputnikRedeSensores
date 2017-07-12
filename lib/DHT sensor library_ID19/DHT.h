@@ -37,18 +37,20 @@ written by Adafruit Industries
 
 class DHT {
   public:
-   DHT(uint8_t pin, uint8_t type, uint8_t count=6);
-   void begin(void);
+   void begin(uint8_t pin, uint8_t type, uint8_t count=6);
    float readTemperature(bool S=false, bool force=false);
    float convertCtoF(float);
    float convertFtoC(float);
    float computeHeatIndex(float temperature, float percentHumidity, bool isFahrenheit=true);
    float readHumidity(bool force=false);
+   float getTemperature(void);
+   float getHumidity(void);
    boolean read(bool force=false);
 
  private:
   uint8_t data[5];
   uint8_t _pin, _type;
+  float _last_temp, _last_humidity;
   #ifdef __AVR
     // Use direct GPIO access on an 8-bit AVR so keep track of the port and bitmask
     // for the digital pin connected to the DHT.  Other platforms will use digitalRead.

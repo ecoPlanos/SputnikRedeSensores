@@ -8,7 +8,15 @@ written by Adafruit Industries
 
 #define MIN_INTERVAL 2000
 
-DHT::DHT(uint8_t pin, uint8_t type, uint8_t count) {
+void DHT::begin(uint8_t pin, uint8_t type, uint8_t count) {
+  // set up the pins!
+  pinMode(_pin, INPUT);
+  // Using this value makes sure that millis() - lastreadtime will be
+  // >= MIN_INTERVAL right away. Note that this assignment wraps around,
+  // but so will the subtraction.
+  _lastreadtime = -MIN_INTERVAL;
+  DEBUG_PRINT("Max clock cycles: "); DEBUG_PRINTLN(_maxcycles, DEC);
+
   _pin = pin;
   _type = type;
   #ifdef __AVR
@@ -21,45 +29,36 @@ DHT::DHT(uint8_t pin, uint8_t type, uint8_t count) {
   // basd on the speed of the processor.
 }
 
-void DHT::begin(void) {
-  // set up the pins!
-  pinMode(_pin, INPUT);
-  // Using this value makes sure that millis() - lastreadtime will be
-  // >= MIN_INTERVAL right away. Note that this assignment wraps around,
-  // but so will the subtraction.
-  _lastreadtime = -MIN_INTERVAL;
-  DEBUG_PRINT("Max clock cycles: "); DEBUG_PRINTLN(_maxcycles, DEC);
-}
-
 //boolean S == Scale.  True == Fahrenheit; False == Celcius
 float DHT::readTemperature(bool S, bool force) {
-  float f = NAN;
+  _last_temp = NAN;
 
   if (read(force)) {
     switch (_type) {
     case DHT11:
-      f = data[2];
+      _last_temp = data[2];
       if(S) {
-        f = convertCtoF(f);
+        _last_temp = convertCtoF(_last_temp);
       }
       break;
     case DHT22:
     case DHT21:
-      f = data[2] & 0x7F;
-      f *= 256;
-      f += data[3];
-      f *= 0.1;
+      _last_temp = data[2] & 0x7F;
+      _last_temp *= 256;
+      _last_temp += data[3];
+      _last_temp *= 0.1;
       if (data[2] & 0x80) {
-        f *= -1;
+        _last_temp *= -1;
       }
       if(S) {
-        f = convertCtoF(f);
+        _last_temp = convertCtoF(_last_temp);
       }
       break;
     }
   }
-  return f;
+  return _last_temp;
 }
+
 
 float DHT::convertCtoF(float c) {
   return c * 1.8 + 32;
@@ -70,22 +69,29 @@ float DHT::convertFtoC(float f) {
 }
 
 float DHT::readHumidity(bool force) {
-  float f = NAN;
+  _last_humidity = NAN;
   if (read()) {
     switch (_type) {
     case DHT11:
-      f = data[0];
+      _last_humidity = data[0];
       break;
     case DHT22:
     case DHT21:
-      f = data[0];
-      f *= 256;
-      f += data[1];
-      f *= 0.1;
+      _last_humidity = data[0];
+      _last_humidity *= 256;
+      _last_humidity += data[1];
+      _last_humidity *= 0.1;
       break;
     }
   }
-  return f;
+  return _last_humidity;
+}
+
+float DHT::getTemperature(void) {
+  return _last_temp;
+}
+float DHT::getHumidity(void) {
+  return _last_humidity;
 }
 
 //boolean isFahrenheit: True == Fahrenheit; False == Celcius

@@ -21,15 +21,15 @@
 // SOFTWARE.
 #include "DHT_U.h"
 
-DHT_Unified::DHT_Unified(uint8_t pin, uint8_t type, uint8_t count, int32_t tempSensorId, int32_t humiditySensorId):
-  _dht(pin, type, count),
-  _type(type),
+DHT_Unified::DHT_Unified(int32_t tempSensorId, int32_t humiditySensorId):
+  _dht(),
   _temp(this, tempSensorId),
   _humidity(this, humiditySensorId)
 {}
 
-void DHT_Unified::begin() {
-  _dht.begin();
+void DHT_Unified::begin(uint8_t pin, uint8_t type, uint8_t count) {
+  _dht.begin(pin, type, count);
+  _type=type;
 }
 
 void DHT_Unified::setName(sensor_t* sensor) {
@@ -84,7 +84,7 @@ bool DHT_Unified::Temperature::getEvent(sensors_event_t* event) {
   event->type        = SENSOR_TYPE_AMBIENT_TEMPERATURE;
   event->timestamp   = millis();
   event->temperature = _parent->_dht.readTemperature();
-  
+
   return true;
 }
 
@@ -138,7 +138,7 @@ bool DHT_Unified::Humidity::getEvent(sensors_event_t* event) {
   event->type              = SENSOR_TYPE_RELATIVE_HUMIDITY;
   event->timestamp         = millis();
   event->relative_humidity = _parent->_dht.readHumidity();
-  
+
   return true;
 }
 
