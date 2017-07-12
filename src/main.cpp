@@ -24,6 +24,7 @@
 ////////////////////
 #include "SputnikTempRH.h"
 #include "SputnikTemp.h"
+#include "SputnikAir.h"
 ////////////////////
 //#include "SputinkRedeSensores.h"
 #define INITIAL_DELAY 100
@@ -55,7 +56,9 @@ File log_file;
 DHT dht11, dht22;
 Adafruit_SHT31 sht31;
 Sensirion sht75;
-Adafruit_MLX90614 mlx;
+// Adafruit_MLX90614 mlx;
+uint16_t mg811_analog;
+uint16_t mq135_analog;
 
 void setup() {
   sys_time = millis();
@@ -88,8 +91,10 @@ void setup() {
     Serial.println("Couldn't find SHT31");
     #endif
   }
-  //  Initialize MLX90614
+  //  Initialize MLX90614 - Temperature IR
   mlx.begin();
+  //  Initialize MG811 - CO2
+  pinMode(MG811_PIN,INPUT);
   //  Print serial header
   #ifdef LOG_SERIAL
   Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
@@ -136,7 +141,7 @@ void loop() {
     #ifdef LOG_SERIAL
     Serial.println("Error reading DHT11 humidity!");
     #endif
-    sd_data_string+=String(",");
+    sd_data_string+=",";
   }
   else {
     #ifdef LOG_SERIAL
@@ -267,13 +272,30 @@ void loop() {
     Serial.println(" *C");
     #endif
     sd_data_string+=String(mlx_t_amb)+",";
-    sd_data_string+=String(mlx_t_obj);
+    sd_data_string+=String(mlx_t_obj)+",";
   } else {
     #ifdef LOG_SERIAL
     Serial.println("Error reading MLX90614 temperature!");
     #endif
-    sd_data_string+=",";
+    sd_data_string+=",,";
   }
+  #ifdef LOG_SERIAL
+  Serial.println("------------------------------------");
+  Serial.println("----------------AIR-----------------");
+  Serial.println("------------------------------------");
+  #endif
+  mg811_analog=analogRead(MG811_PIN);
+  #ifdef LOG_SERIAL
+  Serial.print("MG811 Analogic: ");
+  Serial.println(mg811_analog);
+  #endif
+  sd_data_string+=String(mg811_analog)+",";
+  mq135_analog=analogRead(MQ135_PIN);
+  #ifdef LOG_SERIAL
+  Serial.print("MQ135 Analogic: ");
+  Serial.println(mq135_analog);
+  #endif
+  sd_data_string+=String(mq135_analog)+",";
   // Log to SD card
   if(sd_present)
   {
