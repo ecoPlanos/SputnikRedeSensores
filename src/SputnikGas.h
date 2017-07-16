@@ -16,7 +16,7 @@
 #ifndef SPUTNIKGAS_H_
 #define SPUTNIKGAS_H_
 
-// #include <Arduino.h>
+#include <Arduino.h>
 #include <SparkFunCCS811.h>
 
 #define MG811_PIN 0
@@ -30,8 +30,7 @@ extern uint16_t mg811_analog;
 extern uint16_t mq135_analog;
 
 extern CCS811 ccs811;
-
+//
 void sputnikGasInit(void);
-void sputnikGasInit(Stream *Serial)
 
 #endif

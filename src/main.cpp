@@ -37,6 +37,7 @@
 #define LOG_SERIAL
 
 const String log_file_name="datalog.csv";
+const String config_file_name="Sputnik.conf";
 
 const char* ssid = "SSID";
 const char* password = "PASS";
@@ -48,35 +49,46 @@ uint32_t delayMS;
 
 uint8_t sd_present=false;
 
+void sd_card_init(void);
+void sensors_awake(void);
+void sensors_sleep(void);
+
 Sd2Card card;
 SdVolume volume;
 SdFile root;
-File log_file;
-
-// Adafruit_MLX90614 mlx;
+File log_file, config_file;
 
 void setup() {
   sys_time = millis();
   sys_time_last = sys_time;
   #ifdef LOG_SERIAL
   Serial.begin(115200);
+  Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
+  Serial.println(".i.SputnikRedeSensores by ecoPlanos.i.");
+  Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
+  Serial.println();
   #endif
-  #ifdef LOG_SD
-   if (!SD.begin(SD_CHIP_SEL))
-   {
-     #ifdef LOG_SERIAL
-     Serial.println("Card failed, or not present");
-     #endif
-     sd_present=false;
-   }
-   else
-   {
-     #ifdef LOG_SERIAL
-     Serial.println("SD card initialized.");
-     #endif
-     sd_present=true;
-   }
-  #endif  //ifdef LOG_SD
+
+  sd_card_init();
+  // Read configuration from SD card
+  if(sd_present)
+  {
+    config_file = SD.open(config_file_name, FILE_READ);
+    if (config_file) {
+      #ifdef LOG_SERIAL
+      Serial.println("Config file successfuly open");
+      #endif
+      Serial.write(config_file.read());
+      //  Set delay between sensor readings based on sensor details.
+      delayMS = (SENSORS_READ_INTERVAL > delayMS) ? SENSORS_READ_INTERVAL : delayMS;
+    }
+    else
+    {
+      #ifdef LOG_SERIAL
+      Serial.println("Error: can't open configuration file!!!");
+      #endif
+    }
+  }
   delay(INITIAL_DELAY);
   // Initialize DHTs.
   temp_hr_init();
@@ -86,18 +98,11 @@ void setup() {
     Serial.println("Couldn't find SHT31");
     #endif
   }
-  mlx.begin();      //  Initialize MLX90614 - Temperature IR
-  // sputnikGasInit(); //  Initialize Gas sensors
-  sputnikGasInit(&Serial); //  Initialize Gas sensors
-  //  Print serial header
-  #ifdef LOG_SERIAL
-  Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
-  Serial.println(".i.SputnikRedeSensores by ecoPlanos.i.");
-  Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
-  Serial.println();
-  #endif
-  //  Set delay between sensor readings based on sensor details.
-  delayMS = (SENSORS_READ_INTERVAL > delayMS) ? SENSORS_READ_INTERVAL : delayMS;
+  //  Initialize Temperature Sensors
+  temp_init();
+
+  sputnikGasInit();
+
   sys_time = micros();
   setup_time = sys_time-sys_time_last;
   sys_time_last = sys_time;
@@ -108,7 +113,12 @@ void loop() {
   acquisition_time = sys_time-sys_time_last;
   sys_time_last = sys_time;
   String sd_data_string = "";
-  // Get temperature event and print its value.
+
+  sensors_awake();
+  #ifdef LOG_SD
+  if(!sd_present)
+    sd_card_init();
+  #endif
 
   #ifdef LOG_SERIAL
   Serial.println("------------------------------------");
@@ -275,7 +285,7 @@ void loop() {
   }
   #ifdef LOG_SERIAL
   Serial.println("------------------------------------");
-  Serial.println("----------------AIR-----------------");
+  Serial.println("----------------GAS-----------------");
   Serial.println("------------------------------------");
   #endif
   mg811_analog=analogRead(MG811_PIN);
@@ -290,6 +300,26 @@ void loop() {
   Serial.println(mq135_analog);
   #endif
   sd_data_string+=String(mq135_analog)+",";
+
+  if(ccs811.dataAvailable())
+  {
+    ccs811.readAlgorithmResults();
+    #ifdef LOG_SERIAL
+    Serial.print("CCS188 CO2: ");
+    Serial.println(ccs811.getCO2());
+    Serial.print("CCS188 TVOC: ");
+    Serial.println(ccs811.getTVOC());
+    #endif
+    sd_data_string+=String(ccs811.getCO2())+","+String(ccs811.getTVOC())+",";
+  }
+  else
+  {
+    #ifdef LOG_SERIAL
+    Serial.println("ERROR: CCS188 didn't respond!");
+    #endif
+    sd_data_string+=",,";
+  }
+
   // Log to SD card
   if(sd_present)
   {
@@ -307,8 +337,35 @@ void loop() {
       #ifdef LOG_SERIAL
       Serial.println("error opening "+log_file_name);
       #endif
+      sd_card_init();
     }
   }
   // Delay between measurements.
+  sensors_sleep();
   delay(delayMS);
+}
+
+void sd_card_init(void)
+{
+  if (!SD.begin(SD_CHIP_SEL))
+   {
+     #ifdef LOG_SERIAL
+     Serial.println("Card failed, or not present");
+     #endif
+     sd_present=false;
+   }
+   else
+   {
+     #ifdef LOG_SERIAL
+     Serial.println("SD card initialized.");
+     #endif
+     sd_present=true;
+   }
+}
+
+void sensors_awake(void){
+  digitalWrite(CCS811_NWAK, LOW);
+}
+void sensors_sleep(void){
+  digitalWrite(CCS811_NWAK, HIGH);
 }
