@@ -13,13 +13,25 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SPUTNIKAIR_H_
-#define SPUTNIKAIR_H_
+#ifndef SPUTNIKGAS_H_
+#define SPUTNIKGAS_H_
+
+// #include <Arduino.h>
+#include <SparkFunCCS811.h>
 
 #define MG811_PIN 0
 #define MQ135_PIN 1
+#define CCS811_NWAK 47
+#define CCS811_NINT 48
+#define CCS811_NRST 49
+#define CCS811_ADDR 0x5B //Default I2C Address
 
 extern uint16_t mg811_analog;
 extern uint16_t mq135_analog;
+
+extern CCS811 ccs811;
+
+void sputnikGasInit(void);
+void sputnikGasInit(Stream *Serial)
 
 #endif

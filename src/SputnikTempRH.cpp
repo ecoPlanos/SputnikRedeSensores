@@ -1,5 +1,9 @@
 #include "SputnikTempRH.h"
 
+DHT dht11, dht22;
+Adafruit_SHT31 sht31;
+Sensirion sht75;
+
 void temp_hr_init(void)
 {
   dht11.begin(DHT11_PIN, DHT11);

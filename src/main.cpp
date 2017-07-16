@@ -24,7 +24,7 @@
 ////////////////////
 #include "SputnikTempRH.h"
 #include "SputnikTemp.h"
-#include "SputnikAir.h"
+#include "SputnikGas.h"
 ////////////////////
 //#include "SputinkRedeSensores.h"
 #define INITIAL_DELAY 100
@@ -53,12 +53,7 @@ SdVolume volume;
 SdFile root;
 File log_file;
 
-DHT dht11, dht22;
-Adafruit_SHT31 sht31;
-Sensirion sht75;
 // Adafruit_MLX90614 mlx;
-uint16_t mg811_analog;
-uint16_t mq135_analog;
 
 void setup() {
   sys_time = millis();
@@ -91,10 +86,9 @@ void setup() {
     Serial.println("Couldn't find SHT31");
     #endif
   }
-  //  Initialize MLX90614 - Temperature IR
-  mlx.begin();
-  //  Initialize MG811 - CO2
-  pinMode(MG811_PIN,INPUT);
+  mlx.begin();      //  Initialize MLX90614 - Temperature IR
+  // sputnikGasInit(); //  Initialize Gas sensors
+  sputnikGasInit(&Serial); //  Initialize Gas sensors
   //  Print serial header
   #ifdef LOG_SERIAL
   Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
