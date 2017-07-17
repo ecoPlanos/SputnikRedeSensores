@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source /home/gasoile2/Private/Personal/Projects/ecoPlanos/dev/SputnikRedeSensores/Kicad/Gas/Gas.sch)
-    (date "Dom 16 Jul 2017 16:29:55 WEST")
+    (date "Dom 16 Jul 2017 23:34:43 WEST")
     (tool "Eeschema 4.0.6-e0-6349~53~ubuntu16.04.1")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -71,7 +71,7 @@
       (tstamp 596B4688))
     (comp (ref J2)
       (value Arduino)
-      (footprint Connectors_Terminal_Blocks:TerminalBlock_Pheonix_MPT-2.54mm_6pol)
+      (footprint Connectors_Terminal_Blocks:TerminalBlock_Pheonix_MPT-2.54mm_10pol)
       (libsource (lib conn) (part Screw_Terminal_1x10))
       (sheetpath (names /) (tstamps /))
       (tstamp 596665A1)))

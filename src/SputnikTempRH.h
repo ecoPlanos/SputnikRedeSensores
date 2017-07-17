@@ -26,6 +26,7 @@
 #define DHT22_PIN            52         // Pin which is connected to the DHT sensor.
 #define SHT75_DATA           50         //
 #define SHT75_SCK            51         //
+#define THR_LED              25
 
 extern DHT dht11, dht22;
 extern Adafruit_SHT31 sht31;

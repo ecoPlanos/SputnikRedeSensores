@@ -17,7 +17,8 @@
 ////////////////////
 #include <SPI.h>
 #include <SD.h>
-#include <ESP8266wifi.h>
+#include <DS1302.h>
+// #include <ESP8266wifi.h>
 // #include <WiFiClient.h>
 // #include <ESP8266WebServer.h>
 // #include <ESP8266FtpServer.h>
@@ -36,8 +37,8 @@
 #define LOG_SD
 #define LOG_SERIAL
 
-const String log_file_name="datalog.csv";
-const String config_file_name="Sputnik.conf";
+const String log_file_sufix="Data.csv";
+const String config_file_name="SPUTNIK.CF";
 
 const char* ssid = "SSID";
 const char* password = "PASS";
@@ -46,8 +47,10 @@ const char* password = "PASS";
 
 uint32_t sys_time, sys_time_last, setup_time, acquisition_time;
 uint32_t delayMS;
+uint8_t thr_led_state = LOW;
 
 uint8_t sd_present=false;
+String log_file_name;
 
 void sd_card_init(void);
 void sensors_awake(void);
@@ -58,18 +61,37 @@ SdVolume volume;
 SdFile root;
 File log_file, config_file;
 
+DS1302 rtc(24, 23, 22);
+Time t;
+
 void setup() {
   sys_time = millis();
   sys_time_last = sys_time;
-  #ifdef LOG_SERIAL
+
+  pinMode(THR_LED, OUTPUT);
+
+  // Set the clock to run-mode, and disable the write protection
+  rtc.halt(false);
+  rtc.writeProtect(false);
+  //Adjust RTC Date And Time
+  rtc.setDOW(MONDAY);        // Set Day-of-Week to FRIDAY
+  rtc.setTime(13, 45, 30);     // Set the time to 12:00:00 (24hr format)
+  rtc.setDate(17, 07, 2017);   // Set the date to August 6th, 2010
   Serial.begin(115200);
+  #ifdef LOG_SERIAL
   Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
   Serial.println(".i.SputnikRedeSensores by ecoPlanos.i.");
   Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
   Serial.println();
   #endif
 
+  t = rtc.getTime();
+
+  log_file_name = String(t.year)+"/"+String(t.mon)+"/"+String(t.date)+"/"+String(t.hour)+"H"+String(t.min)+"M"+String(t.sec)+".CSV";
+
+  Serial.println(log_file_name);
   sd_card_init();
+  SD.mkdir(String(t.year)+"/"+String(t.mon)+"/"+String(t.date));
   // Read configuration from SD card
   if(sd_present)
   {
@@ -78,9 +100,13 @@ void setup() {
       #ifdef LOG_SERIAL
       Serial.println("Config file successfuly open");
       #endif
-      Serial.write(config_file.read());
+      String delayMSstr = "";
+      while (config_file.available()) {
+        delayMSstr+=config_file.read();
+      }
+      // delayMS = delayMSstr.toInt();
+      // Serial.println(delayMSstr);
       //  Set delay between sensor readings based on sensor details.
-      delayMS = (SENSORS_READ_INTERVAL > delayMS) ? SENSORS_READ_INTERVAL : delayMS;
     }
     else
     {
@@ -89,6 +115,8 @@ void setup() {
       #endif
     }
   }
+  // delayMS = (SENSORS_READ_INTERVAL > delayMS) ? SENSORS_READ_INTERVAL : delayMS;
+  delayMS = SENSORS_READ_INTERVAL;
   delay(INITIAL_DELAY);
   // Initialize DHTs.
   temp_hr_init();
@@ -119,7 +147,7 @@ void loop() {
   if(!sd_present)
     sd_card_init();
   #endif
-
+  sd_data_string+=String(sys_time)+",";
   #ifdef LOG_SERIAL
   Serial.println("------------------------------------");
   Serial.println("----------------T&RH----------------");
@@ -342,6 +370,8 @@ void loop() {
   }
   // Delay between measurements.
   sensors_sleep();
+  thr_led_state = ~thr_led_state;
+  digitalWrite(THR_LED,thr_led_state);
   delay(delayMS);
 }
 

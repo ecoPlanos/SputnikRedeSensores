@@ -111,7 +111,7 @@ F 3 "" H 3850 1650 50  0001 C CNN
 $EndComp
 Text Label 4000 2350 0    39   ~ 0
 DataSHT75
-Text Label 4100 2150 0    39   ~ 0
+Text Label 4050 2050 0    39   ~ 0
 SKC_SHT75
 Text Label 2800 2050 0    39   ~ 0
 Data_DHT22

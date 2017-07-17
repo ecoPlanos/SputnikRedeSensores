@@ -346,7 +346,7 @@ L Screw_Terminal_1x10 J2
 U 1 1 59668A2D
 P 3200 900
 F 0 "J2" H 3200 1950 50  0000 C TNN
-F 1 "Screw_Terminal_1x10" V 3050 900 50  0000 C TNN
+F 1 "Arduino" V 3050 900 50  0000 C TNN
 F 2 "Connectors_Terminal_Blocks:TerminalBlock_Pheonix_MPT-2.54mm_10pol" H 3200 -125 50  0001 C CNN
 F 3 "" H 3175 1700 50  0001 C CNN
 	1    3200 900 
