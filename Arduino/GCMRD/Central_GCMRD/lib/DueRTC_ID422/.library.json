@@ -1,0 +1,29 @@
+{
+    "name": "DueRTC", 
+    "repository": {
+        "url": "https://github.com/MarkusLange/Arduino-Due-RTC-Library.git", 
+        "type": "git"
+    }, 
+    "platforms": [
+        "atmelsam"
+    ], 
+    "frameworks": [
+        "arduino"
+    ], 
+    "version": "2.1", 
+    "authors": [
+        {
+            "maintainer": false, 
+            "name": "MarkusLange", 
+            "url": "https://github.com/MarkusLange", 
+            "email": null
+        }
+    ], 
+    "keywords": [
+        "clock", 
+        "rtc", 
+        "time"
+    ], 
+    "id": 422, 
+    "description": "Access to the RTC Module inside the SAM3X8E from the DUE to set time and alarm functions"
+}

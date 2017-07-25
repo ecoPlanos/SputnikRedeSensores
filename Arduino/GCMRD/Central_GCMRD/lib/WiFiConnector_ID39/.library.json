@@ -1,0 +1,29 @@
+{
+    "name": "WiFiConnector", 
+    "repository": {
+        "url": "https://github.com/cmmakerclub/WiFiConnector.git", 
+        "type": "git"
+    }, 
+    "platforms": [
+        "espressif8266"
+    ], 
+    "frameworks": [
+        "arduino"
+    ], 
+    "version": "010a555538", 
+    "authors": [
+        {
+            "maintainer": false, 
+            "name": "Chiang Mai Maker Club", 
+            "url": "https://github.com/cmmakerclub", 
+            "email": "nat@cmmc.io"
+        }
+    ], 
+    "keywords": [
+        "wifi connector", 
+        "wifi", 
+        "wifi manager"
+    ], 
+    "id": 39, 
+    "description": "A CMMC WiFi Connect (formerly known as WiFi Connector ESP8266)"
+}

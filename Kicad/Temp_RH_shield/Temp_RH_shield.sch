@@ -29,6 +29,7 @@ LIBS:atmel
 LIBS:contrib
 LIBS:valves
 LIBS:freetronics_schematic
+LIBS:Temp_RH_shield-cache
 EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
@@ -169,8 +170,6 @@ NoConn ~ 5200 2900
 NoConn ~ 6250 2900
 NoConn ~ 6250 3000
 NoConn ~ 6250 3100
-NoConn ~ 3400 1650
-NoConn ~ 3400 1750
 NoConn ~ 3400 1850
 NoConn ~ 3400 2050
 NoConn ~ 3400 2150
@@ -254,13 +253,9 @@ Wire Wire Line
 Wire Wire Line
 	4350 4200 4350 1050
 Wire Wire Line
-	1200 1050 4350 1050
+	1200 1050 7500 1050
 Wire Wire Line
-	4350 1050 7500 1050
-Wire Wire Line
-	1200 1050 1200 2450
-Wire Wire Line
-	1200 2450 1200 4650
+	1200 1050 1200 4650
 Wire Wire Line
 	1200 2450 1500 2450
 Wire Wire Line
@@ -271,17 +266,9 @@ Connection ~ 4350 1050
 Wire Wire Line
 	1100 4800 1500 4800
 Wire Wire Line
-	1100 750  1100 2600
+	1100 750  1100 7000
 Wire Wire Line
-	1100 2600 1100 4800
-Wire Wire Line
-	1100 4800 1100 4900
-Wire Wire Line
-	1100 4900 1100 7000
-Wire Wire Line
-	1100 750  3950 750 
-Wire Wire Line
-	3950 750  7850 750 
+	1100 750  7850 750 
 Wire Wire Line
 	7850 750  7850 1500
 Wire Wire Line
@@ -341,9 +328,7 @@ Wire Wire Line
 Wire Wire Line
 	9100 2350 9100 1500
 Wire Wire Line
-	1500 2350 6850 2350
-Wire Wire Line
-	6850 2350 9100 2350
+	1500 2350 9100 2350
 Wire Wire Line
 	9000 1500 9000 6500
 Wire Wire Line
@@ -355,17 +340,9 @@ Wire Wire Line
 Wire Wire Line
 	1100 4900 1500 4900
 Wire Wire Line
-	7050 1500 7050 1950
+	7050 1500 7050 4350
 Wire Wire Line
-	7050 1950 7050 3700
-Wire Wire Line
-	7050 3700 7050 4350
-Wire Wire Line
-	3400 1950 3950 1950
-Wire Wire Line
-	3950 1950 4450 1950
-Wire Wire Line
-	4450 1950 7050 1950
+	3400 1950 7050 1950
 Wire Wire Line
 	6850 1500 6850 2350
 Connection ~ 6850 2350
@@ -394,9 +371,7 @@ Wire Wire Line
 Wire Wire Line
 	4100 7550 1350 7550
 Wire Wire Line
-	1350 7550 1350 5350
-Wire Wire Line
-	1350 5350 1350 2850
+	1350 7550 1350 2850
 Wire Wire Line
 	6250 1500 6250 2500
 Wire Wire Line
@@ -451,9 +426,7 @@ Connection ~ 4450 1950
 Wire Wire Line
 	7050 4350 4350 4350
 Wire Wire Line
-	4350 4300 4350 4350
-Wire Wire Line
-	4350 4350 4350 4400
+	4350 4300 4350 4400
 Connection ~ 7050 1950
 Connection ~ 4350 4350
 Wire Wire Line
@@ -462,9 +435,7 @@ Connection ~ 7050 3700
 Connection ~ 1100 4800
 Connection ~ 1100 4900
 Wire Wire Line
-	1500 2550 1500 2600
-Wire Wire Line
-	1500 2600 1500 2650
+	1500 2550 1500 2650
 Wire Wire Line
 	1100 2600 1500 2600
 Connection ~ 1500 2600
@@ -496,9 +467,7 @@ RTC_DATA
 Text Label 8700 3400 1    60   ~ 0
 RTC_RST
 Wire Wire Line
-	3400 4600 3400 4650
-Wire Wire Line
-	3400 4650 3400 4700
+	3400 4600 3400 4700
 Wire Wire Line
 	1200 4650 3400 4650
 Connection ~ 3400 4650
@@ -569,4 +538,27 @@ F 3 "" H 9800 2250 50  0001 C CNN
 	1    9800 2250
 	1    0    0    -1  
 $EndComp
+$Comp
+L Screw_Terminal_1x02 J11
+U 1 1 5976AABE
+P 4200 1300
+F 0 "J11" H 4200 1550 50  0000 C TNN
+F 1 "Screw_Terminal_1x02" V 4050 1300 50  0000 C TNN
+F 2 "Connectors_Terminal_Blocks:TerminalBlock_Pheonix_PT-3.5mm_2pol" H 4200 1075 50  0001 C CNN
+F 3 "" H 4175 1300 50  0001 C CNN
+	1    4200 1300
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	4100 1500 3400 1500
+Wire Wire Line
+	3400 1500 3400 1650
+Wire Wire Line
+	4300 1500 4300 1550
+Wire Wire Line
+	4300 1550 3450 1550
+Wire Wire Line
+	3450 1550 3450 1750
+Wire Wire Line
+	3450 1750 3400 1750
 $EndSCHEMATC

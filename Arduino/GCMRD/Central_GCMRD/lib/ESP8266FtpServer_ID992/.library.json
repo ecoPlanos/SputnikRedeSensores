@@ -1,0 +1,39 @@
+{
+    "description": "Very Simple FTP server for SPIFFS on esp8266", 
+    "repository": {
+        "url": "https://github.com/nailbuster/esp8266FTPServer", 
+        "type": "git"
+    }, 
+    "platforms": [
+        "espressif8266"
+    ], 
+    "export": {
+        "exclude": [
+            "extras", 
+            "docs", 
+            "tests", 
+            "test", 
+            "*.doxyfile", 
+            "*.pdf"
+        ], 
+        "include": null
+    }, 
+    "authors": [
+        {
+            "maintainer": true, 
+            "name": "david@paivahome.com", 
+            "url": null, 
+            "email": null
+        }
+    ], 
+    "keywords": [
+        "communication"
+    ], 
+    "id": 992, 
+    "name": "ESP8266FtpServer", 
+    "frameworks": [
+        "arduino"
+    ], 
+    "version": "1.0.1", 
+    "homepage": null
+}

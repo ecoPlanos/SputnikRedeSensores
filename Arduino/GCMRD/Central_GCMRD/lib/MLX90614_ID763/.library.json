@@ -1,0 +1,46 @@
+{
+    "description": "Library to support Melexis MLX90614 infrared thermometer", 
+    "repository": {
+        "url": "https://github.com/stevemarple/MLX90614", 
+        "type": "git"
+    }, 
+    "platforms": [
+        "atmelavr", 
+        "atmelsam", 
+        "espressif8266", 
+        "intel_arc32", 
+        "microchippic32", 
+        "nordicnrf51", 
+        "teensy", 
+        "timsp430"
+    ], 
+    "export": {
+        "exclude": [
+            "extras", 
+            "docs", 
+            "tests", 
+            "test", 
+            "*.doxyfile", 
+            "*.pdf"
+        ], 
+        "include": null
+    }, 
+    "authors": [
+        {
+            "maintainer": true, 
+            "name": "Steve Marple", 
+            "url": null, 
+            "email": "stevemarple@googlemail.com"
+        }
+    ], 
+    "keywords": [
+        "sensors"
+    ], 
+    "id": 763, 
+    "name": "MLX90614", 
+    "frameworks": [
+        "arduino"
+    ], 
+    "version": "0.1.2", 
+    "homepage": null
+}

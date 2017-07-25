@@ -45,8 +45,6 @@ const String config_file_name="SPUTNIK.CFG";
 
 const char* ssid = "SSID";
 const char* password = "PASS";
-// See guide for details on sensor wiring and usage:
-//   https://learn.adafruit.com/dht/overview
 
 uint32_t millis_start, millis_end, setup_time, acquisition_time;
 uint32_t delayMS;
