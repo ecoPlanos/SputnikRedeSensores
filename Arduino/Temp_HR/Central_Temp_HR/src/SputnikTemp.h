@@ -20,6 +20,7 @@
 #include <SparkFunMAX31855k.h>
 
 #define NTC_PIN 0
+#define PT100_PIN 1
 #define THERMOPAR_CS 10
 #define THERMOPAR_VCC 52
 
