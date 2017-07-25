@@ -128,7 +128,7 @@ F 3 "" H 5750 2350 50  0001 C CNN
 	1    5750 2350
 	1    0    0    -1  
 $EndComp
-Text Label 5350 1550 0    39   ~ 0
+Text Label 5450 1650 0    39   ~ 0
 Reset
 Text Label 4750 1350 0    39   ~ 0
 SCL

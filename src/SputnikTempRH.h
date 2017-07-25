@@ -22,10 +22,10 @@
 #include <Adafruit_SHT31.h>
 #include <Sensirion.h>    //SHT75
 
-#define DHT11_PIN            53         // Pin which is connected to the DHT sensor.
-#define DHT22_PIN            52         // Pin which is connected to the DHT sensor.
-#define SHT75_DATA           50         //
-#define SHT75_SCK            51         //
+#define DHT11_PIN            2         // Pin which is connected to the DHT sensor.
+#define DHT22_PIN            3         // Pin which is connected to the DHT sensor.
+#define SHT75_SCK            5         //
+#define SHT75_DATA           6         //
 #define THR_LED              25
 
 extern DHT dht11, dht22;

@@ -18,7 +18,7 @@ Arduino IDE 1.8.1
 
 This code is released under the [MIT License](http://opensource.org/licenses/MIT).
 
-Please review the LICENSE.md file included with this example. If you have any questions 
+Please review the LICENSE.md file included with this example. If you have any questions
 or concerns with licensing, please contact techsupport@sparkfun.com.
 
 Distributed as-is; no warranty is given.
@@ -52,7 +52,7 @@ CCS811Core::status CCS811Core::beginCore(void)
 {
 	CCS811Core::status returnError = SENSOR_SUCCESS;
 
-	Wire.begin();
+	Wire1.begin();
 
 #ifdef __AVR__
 #else
@@ -73,18 +73,18 @@ CCS811Core::status CCS811Core::beginCore(void)
 		temp++;
 	}
 
-	while ( Wire.available() ) //Clear wire as a precaution
+	while ( Wire1.available() ) //Clear Wire1 as a precaution
 	{
-		Wire.read();
+		Wire1.read();
 	}
-	
+
 	//Check the ID register to determine if the operation was a success.
 	uint8_t readCheck;
 	readCheck = 0;
 	returnError = readRegister(CSS811_HW_ID, &readCheck);
 
 	if( returnError != SENSOR_SUCCESS ) return returnError;
-	
+
 	if( readCheck != 0x81 )
 	{
 		returnError = SENSOR_ID_ERROR;
@@ -109,16 +109,16 @@ CCS811Core::status CCS811Core::readRegister(uint8_t offset, uint8_t* outputPoint
 	uint8_t result;
 	uint8_t numBytes = 1;
 	CCS811Core::status returnError = SENSOR_SUCCESS;
-	Wire.beginTransmission(I2CAddress);
-	Wire.write(offset);
-	if( Wire.endTransmission() != 0 )
+	Wire1.beginTransmission(I2CAddress);
+	Wire1.write(offset);
+	if( Wire1.endTransmission() != 0 )
 	{
 		returnError = SENSOR_I2C_ERROR;
 	}
-	Wire.requestFrom(I2CAddress, numBytes);
-	while ( Wire.available() ) // slave may send less than requested
+	Wire1.requestFrom(I2CAddress, numBytes);
+	while ( Wire1.available() ) // slave may send less than requested
 	{
-		result = Wire.read(); // receive a byte as a proper uint8_t
+		result = Wire1.read(); // receive a byte as a proper uint8_t
 	}
 	*outputPointer = result;
 
@@ -148,27 +148,27 @@ CCS811Core::status CCS811Core::multiReadRegister(uint8_t offset, uint8_t *output
 	uint8_t i = 0;
 	uint8_t c = 0;
 	//Set the address
-	Wire.beginTransmission(I2CAddress);
-	Wire.write(offset);
-	if( Wire.endTransmission() != 0 )
+	Wire1.beginTransmission(I2CAddress);
+	Wire1.write(offset);
+	if( Wire1.endTransmission() != 0 )
 	{
 		returnError = SENSOR_I2C_ERROR;
 	}
 	else  //OK, all worked, keep going
 	{
 		// request 6 bytes from slave device
-		Wire.requestFrom(I2CAddress, length);
-		while ( (Wire.available()) && (i < length))  // slave may send less than requested
+		Wire1.requestFrom(I2CAddress, length);
+		while ( (Wire1.available()) && (i < length))  // slave may send less than requested
 		{
-			c = Wire.read(); // receive a byte as character
+			c = Wire1.read(); // receive a byte as character
 			*outputPointer = c;
 			outputPointer++;
 			i++;
 		}
 		//dump extra
-		while(Wire.available())
+		while(Wire1.available())
 		{
-			Wire.read();
+			Wire1.read();
 		}
 	}
 
@@ -187,11 +187,11 @@ CCS811Core::status CCS811Core::multiReadRegister(uint8_t offset, uint8_t *output
 //****************************************************************************//
 CCS811Core::status CCS811Core::writeRegister(uint8_t offset, uint8_t dataToWrite) {
 	CCS811Core::status returnError = SENSOR_SUCCESS;
-	
-	Wire.beginTransmission(I2CAddress);
-	Wire.write(offset);
-	Wire.write(dataToWrite);
-	if( Wire.endTransmission() != 0 )
+
+	Wire1.beginTransmission(I2CAddress);
+	Wire1.write(offset);
+	Wire1.write(dataToWrite);
+	if( Wire1.endTransmission() != 0 )
 	{
 		returnError = SENSOR_I2C_ERROR;
 	}
@@ -219,15 +219,15 @@ CCS811Core::status CCS811Core::multiWriteRegister(uint8_t offset, uint8_t *input
 	//define pointer that will point to the external space
 	uint8_t i = 0;
 	//Set the address
-	Wire.beginTransmission(I2CAddress);
-	Wire.write(offset);
+	Wire1.beginTransmission(I2CAddress);
+	Wire1.write(offset);
 	while ( i < length )  // send data bytes
 	{
-		Wire.write(*inputPointer); // receive a byte as character
+		Wire1.write(*inputPointer); // receive a byte as character
 		inputPointer++;
 		i++;
 	}
-	if( Wire.endTransmission() != 0 )
+	if( Wire1.endTransmission() != 0 )
 	{
 		returnError = SENSOR_I2C_ERROR;
 	}
@@ -285,22 +285,22 @@ CCS811Core::status CCS811::begin( void )
 	for( uint32_t i = 0; i < 200000; i++ ) //Spin for a good while
 	{
 		temp++;
-	}	
+	}
 #endif
 	if( checkForStatusError() == true ) return SENSOR_INTERNAL_ERROR;
-	
+
 	if( appValid() == false ) return SENSOR_INTERNAL_ERROR;
-	
+
 	//Write 0 bytes to this register to start app
-	Wire.beginTransmission(I2CAddress);
-	Wire.write(CSS811_APP_START);
-	if( Wire.endTransmission() != 0 )
+	Wire1.beginTransmission(I2CAddress);
+	Wire1.write(CSS811_APP_START);
+	if( Wire1.endTransmission() != 0 )
 	{
 		return SENSOR_I2C_ERROR;
-	}	
-	
+	}
+
 	returnError = setDriveMode(1); //Read every second
-	
+
 	return returnError;
 }
 
@@ -368,7 +368,7 @@ bool CCS811::appValid( void )
 uint8_t CCS811::getErrorRegister( void )
 {
 	uint8_t value;
-	
+
 	CCS811Core::status returnError = readRegister( CSS811_ERROR_ID, &value );
 	if( returnError != SENSOR_SUCCESS )
 	{
@@ -404,9 +404,9 @@ CCS811Core::status CCS811::setBaseline( uint16_t input )
 	uint8_t data[2];
 	data[0] = (input >> 8) & 0x00FF;
 	data[1] = input & 0x00FF;
-	
+
 	CCS811Core::status returnError = multiWriteRegister(CSS811_BASELINE, data, 2);
-	
+
 	return returnError;
 }
 
@@ -458,10 +458,10 @@ CCS811Core::status CCS811::setEnvironmentalData( float relativeHumidity, float t
 {
 	//Check for invalid temperatures
 	if((temperature < -25)||(temperature > 50)) return SENSOR_GENERIC_ERROR;
-	
+
 	//Check for invalid humidity
 	if((relativeHumidity < 0)||(relativeHumidity > 100)) return SENSOR_GENERIC_ERROR;
-	
+
 	uint32_t rH = relativeHumidity * 1000; //42.348 becomes 42348
 	uint32_t temp = temperature * 1000; //23.2 becomes 23200
 
@@ -507,7 +507,7 @@ CCS811Core::status CCS811::readNTC( void )
 	//Serial.println(ntcCounts + vrefCounts);
 	resistance = ((float)ntcCounts * refResistance / (float)vrefCounts);
 
-	
+
 	//Code from Milan Malesevic and Zoran Stupic, 2011,
 	//Modified by Max Mayfield,
 	temperature = log((long)resistance);

@@ -25,7 +25,6 @@
 ////////////////////
 #include "SputnikTempRH.h"
 #include "SputnikTemp.h"
-#include "SputnikGas.h"
 ////////////////////
 //#include "SputinkRedeSensores.h"
 #define INITIAL_DELAY 100
@@ -33,24 +32,28 @@
 #define SENSORS_READ_INTERVAL 1000 //Sensors read minimum interval (ms)
 
 #define SD_CHIP_SEL          4//10
+#define SD2_CHIP_SEL          10
+
+#define SD_CARD_DELAY 500
+#define SD_MAX_TRIES 3
 
 #define LOG_SD
 #define LOG_SERIAL
 
 const String log_file_sufix="Data.csv";
-const String config_file_name="SPUTNIK.CF";
+const String config_file_name="SPUTNIK.CFG";
 
 const char* ssid = "SSID";
 const char* password = "PASS";
 // See guide for details on sensor wiring and usage:
 //   https://learn.adafruit.com/dht/overview
 
-uint32_t sys_time, sys_time_last, setup_time, acquisition_time;
+uint32_t millis_start, millis_end, setup_time, acquisition_time;
 uint32_t delayMS;
-uint8_t thr_led_state = LOW;
+uint8_t thr_led_state;
 
-uint8_t sd_present=false;
-String log_file_name;
+uint8_t sd_present;
+String log_file_name, report_file_name;
 
 void sd_card_init(void);
 void sensors_awake(void);
@@ -59,24 +62,14 @@ void sensors_sleep(void);
 Sd2Card card;
 SdVolume volume;
 SdFile root;
-File log_file, config_file;
+File log_file, config_file, report_file, test_file;
 
-DS1302 rtc(24, 23, 22);
+DS1302 rtc(52, 50, 48);
 Time t;
 
 void setup() {
-  sys_time = millis();
-  sys_time_last = sys_time;
+  millis_start = millis();
 
-  pinMode(THR_LED, OUTPUT);
-
-  // Set the clock to run-mode, and disable the write protection
-  rtc.halt(false);
-  rtc.writeProtect(false);
-  //Adjust RTC Date And Time
-  rtc.setDOW(MONDAY);        // Set Day-of-Week to FRIDAY
-  rtc.setTime(13, 45, 30);     // Set the time to 12:00:00 (24hr format)
-  rtc.setDate(17, 07, 2017);   // Set the date to August 6th, 2010
   Serial.begin(115200);
   #ifdef LOG_SERIAL
   Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
@@ -85,13 +78,56 @@ void setup() {
   Serial.println();
   #endif
 
+  pinMode(THR_LED, OUTPUT);
+  thr_led_state = 0;
+
+  // Set the clock to run-mode, and disable the write protection
+  rtc.halt(false);
+  rtc.writeProtect(false);
+  //Adjust RTC Date And Time
+  // rtc.setDOW(MONDAY);        // Set Day-of-Week to FRIDAY
+  // rtc.setTime(15, 10, 00);     // Set the time to 12:00:00 (24hr format)
+  // rtc.setDate(17, 07, 2017);   // Set the date to August 6th, 2010
   t = rtc.getTime();
 
+  report_file_name ="REPORT.LOG";
   log_file_name = String(t.year)+"/"+String(t.mon)+"/"+String(t.date)+"/"+String(t.hour)+"H"+String(t.min)+"M"+String(t.sec)+".CSV";
 
-  Serial.println(log_file_name);
   sd_card_init();
-  SD.mkdir(String(t.year)+"/"+String(t.mon)+"/"+String(t.date));
+  delay(SD_CARD_DELAY);
+  if(sd_present)
+  {
+    SD.mkdir(String(t.year)+"/"+String(t.mon)+"/"+String(t.date));
+  }
+
+  if(sd_present)
+  {
+    report_file = SD.open(report_file_name, FILE_WRITE);
+
+    if (report_file) {
+      report_file.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^");
+      report_file.println(">>SputnikRedeSensores by ecoPlanos<<");
+      report_file.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^");
+      report_file.println();
+      report_file.println(String(t.year)+"/"+String(t.mon)+"/"+String(t.date)+"/"+String(t.hour)+"H"+String(t.min)+"M"+String(t.sec));
+      report_file.println("Starting new acquisition");
+      report_file.close();
+    }
+    else
+    {
+      #ifdef LOG_SERIAL
+      Serial.println("Error: can't open system log file!!!");
+      #endif
+    }
+    test_file = SD2.open("test.txt",FILE_WRITE);
+    if(test_file)
+    {
+      test_file.println("YEI!");
+      test_file.close();
+    }
+    else
+      Serial.print("ERROR: Can't open file test.txt!!!");
+  }
   // Read configuration from SD card
   if(sd_present)
   {
@@ -117,6 +153,25 @@ void setup() {
   }
   // delayMS = (SENSORS_READ_INTERVAL > delayMS) ? SENSORS_READ_INTERVAL : delayMS;
   delayMS = SENSORS_READ_INTERVAL;
+  #ifdef LOG_SERIAL
+    Serial.print("Logging interval: ");
+    Serial.println(delayMS);
+  #endif
+  if(sd_present)
+  {
+    report_file = SD.open(report_file_name, FILE_WRITE);
+    if (report_file) {
+      report_file.print("Logging interval: ");
+      report_file.println(delayMS);
+      report_file.close();
+    }
+    else
+    {
+      #ifdef LOG_SERIAL
+      Serial.println("Error: can't open system log file!!!");
+      #endif
+    }
+  }
   delay(INITIAL_DELAY);
   // Initialize DHTs.
   temp_hr_init();
@@ -128,18 +183,43 @@ void setup() {
   }
   //  Initialize Temperature Sensors
   temp_init();
-
-  sputnikGasInit();
-
-  sys_time = micros();
-  setup_time = sys_time-sys_time_last;
-  sys_time_last = sys_time;
+  millis_end = millis();
+  #ifdef LOG_SERIAL
+  Serial.print("millis_start: ");
+  Serial.println(millis_start);
+  Serial.print("millis_end: ");
+  Serial.println(millis_end);
+  #endif
+  if(millis_end > millis_start)
+  {
+    setup_time = millis_end-millis_start;
+  }
+  else
+  {
+    setup_time = 0XFFFFFFFF-millis_start+millis_end;
+  }
+  #ifdef LOG_SERIAL
+  Serial.print("Setup time: ");
+  if(setup_time >= 60000)
+  {
+    Serial.print((uint8_t) (setup_time/60000));
+    Serial.println("m");
+  }
+  else if(setup_time >= 1000)
+  {
+    Serial.print((uint8_t) (setup_time/1000));
+    Serial.println("s");
+  }
+  else
+  {
+    Serial.print(setup_time);
+    Serial.println("ms");
+  }
+  #endif
 }
 
 void loop() {
-  sys_time = micros();
-  acquisition_time = sys_time-sys_time_last;
-  sys_time_last = sys_time;
+  millis_start = millis();
   String sd_data_string = "";
 
   sensors_awake();
@@ -147,7 +227,7 @@ void loop() {
   if(!sd_present)
     sd_card_init();
   #endif
-  sd_data_string+=String(sys_time)+",";
+  sd_data_string+=String(millis_start)+",";
   #ifdef LOG_SERIAL
   Serial.println("------------------------------------");
   Serial.println("----------------T&RH----------------");
@@ -311,42 +391,39 @@ void loop() {
     #endif
     sd_data_string+=",,";
   }
-  #ifdef LOG_SERIAL
-  Serial.println("------------------------------------");
-  Serial.println("----------------GAS-----------------");
-  Serial.println("------------------------------------");
-  #endif
-  mg811_analog=analogRead(MG811_PIN);
-  #ifdef LOG_SERIAL
-  Serial.print("MG811 Analogic: ");
-  Serial.println(mg811_analog);
-  #endif
-  sd_data_string+=String(mg811_analog)+",";
-  mq135_analog=analogRead(MQ135_PIN);
-  #ifdef LOG_SERIAL
-  Serial.print("MQ135 Analogic: ");
-  Serial.println(mq135_analog);
-  #endif
-  sd_data_string+=String(mq135_analog)+",";
-
-  if(ccs811.dataAvailable())
-  {
-    ccs811.readAlgorithmResults();
+  thermopar.readCJT();
+  if (!isnan(thermopar.temperature_cjt)) {
     #ifdef LOG_SERIAL
-    Serial.print("CCS188 CO2: ");
-    Serial.println(ccs811.getCO2());
-    Serial.print("CCS188 TVOC: ");
-    Serial.println(ccs811.getTVOC());
+    Serial.print("Thermopar CJT temp: ");
+    Serial.print(thermopar.temperature_cjt);
+    Serial.println(" *C");
     #endif
-    sd_data_string+=String(ccs811.getCO2())+","+String(ccs811.getTVOC())+",";
   }
   else
   {
-    #ifdef LOG_SERIAL
-    Serial.println("ERROR: CCS188 didn't respond!");
-    #endif
-    sd_data_string+=",,";
+    sd_data_string+=",";
   }
+  thermopar.readTempC();
+  if (!isnan(thermopar.temperature_c)) {
+    #ifdef LOG_SERIAL
+    Serial.print("Thermopar temp: ");
+    Serial.print(thermopar.temperature_c);
+    Serial.println(" *C");
+    #endif
+  }
+  else
+  {
+    sd_data_string+=",";
+  }
+  sd_data_string+=String(thermopar.temperature_cjt)+","+String(thermopar.temperature_raw)+",";
+
+  ntc_temp=analogRead(NTC_PIN);
+  #ifdef LOG_SERIAL
+  Serial.print("NTC Temp: ");
+  Serial.print(ntc_temp);
+  Serial.println(" Analog value");
+  #endif
+  sd_data_string+=String(ntc_temp)+",";
 
   // Log to SD card
   if(sd_present)
@@ -372,30 +449,116 @@ void loop() {
   sensors_sleep();
   thr_led_state = ~thr_led_state;
   digitalWrite(THR_LED,thr_led_state);
-  delay(delayMS);
+  millis_end = millis();
+  #ifdef LOG_SERIAL
+  Serial.print("millis_start: ");
+  Serial.println(millis_start);
+  Serial.print("millis_end: ");
+  Serial.println(millis_end);
+  #endif
+  if(millis_end > millis_start)
+ {
+   acquisition_time = millis_end-millis_start;
+ }
+ else
+ {
+   acquisition_time = 0XFFFFFFFF-millis_start+millis_end;
+ }
+  #ifdef LOG_SERIAL
+  Serial.print("Acquisition time: ");
+  if(acquisition_time >= 60000)
+  {
+    Serial.print((uint8_t) (acquisition_time/60000));
+    Serial.println("m");
+  }
+  else if(acquisition_time >= 1000)
+  {
+    Serial.print((uint8_t) (acquisition_time/1000));
+    Serial.println("s");
+  }
+  else
+  {
+    Serial.print(acquisition_time);
+    Serial.println("ms");
+  }
+  #endif
+  if(acquisition_time >= delayMS)
+  {
+    delayMS = ((uint8_t)(acquisition_time/1000))*1000+1000;
+    #ifdef LOG_SERIAL
+    Serial.print("Warning: Acquisition time forced to ");
+    Serial.print(delayMS);
+    Serial.println(" ms");
+    #endif
+    if(sd_present)
+    {
+      report_file = SD.open(report_file_name, FILE_WRITE);
+      if (report_file) {
+        report_file.print("Forced Logging interval: ");
+        report_file.println(delayMS);
+        report_file.close();
+      }
+      else
+      {
+        #ifdef LOG_SERIAL
+        Serial.println("Error: can't open system log file!!!");
+        #endif
+      }
+    }
+  }
+  delay(delayMS-acquisition_time);
 }
 
 void sd_card_init(void)
 {
-  if (!SD.begin(SD_CHIP_SEL))
-   {
-     #ifdef LOG_SERIAL
-     Serial.println("Card failed, or not present");
-     #endif
-     sd_present=false;
-   }
-   else
-   {
-     #ifdef LOG_SERIAL
-     Serial.println("SD card initialized.");
-     #endif
-     sd_present=true;
-   }
+  //SD2.begin(SD2_CHIP_SEL);
+  uint8_t sd_card_failures = 0;
+  while(sd_card_failures < SD_MAX_TRIES)
+  {
+    sd_card_failures++;
+    if (!SD.begin(SD_CHIP_SEL))
+     {
+       #ifdef LOG_SERIAL
+       Serial.print("Card failed, or not present -> try ");
+       Serial.println(sd_card_failures);
+       #endif
+       sd_present=false;
+       delay(500);
+     }
+     else
+     {
+       #ifdef LOG_SERIAL
+       Serial.println("SD card initialized.");
+       #endif
+       sd_present=true;
+       break;
+     }
+  }
+  sd_card_failures = 0;
+  while(sd_card_failures < SD_MAX_TRIES)
+  {
+    sd_card_failures++;
+    if (!SD2.begin(SD2_CHIP_SEL))
+     {
+       #ifdef LOG_SERIAL
+       Serial.print("Card 2 failed, or not present -> try ");
+       Serial.println(sd_card_failures);
+       #endif
+       sd_present=false;
+       delay(500);
+     }
+     else
+     {
+       #ifdef LOG_SERIAL
+       Serial.println("SD card 2 initialized.");
+       #endif
+       sd_present=true;
+       break;
+     }
+  }
 }
 
 void sensors_awake(void){
-  digitalWrite(CCS811_NWAK, LOW);
 }
 void sensors_sleep(void){
-  digitalWrite(CCS811_NWAK, HIGH);
 }

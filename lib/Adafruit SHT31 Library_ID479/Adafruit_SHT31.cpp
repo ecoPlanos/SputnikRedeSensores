@@ -22,7 +22,7 @@ Adafruit_SHT31::Adafruit_SHT31() {
 
 
 boolean Adafruit_SHT31::begin(uint8_t i2caddr) {
-  Wire.begin();
+  Wire1.begin();
   _i2caddr = i2caddr;
   reset();
   //return (readStatus() == 0x40);
@@ -31,11 +31,11 @@ boolean Adafruit_SHT31::begin(uint8_t i2caddr) {
 
 uint16_t Adafruit_SHT31::readStatus(void) {
   writeCommand(SHT31_READSTATUS);
-  Wire.requestFrom(_i2caddr, (uint8_t)3);
-  uint16_t stat = Wire.read();
+  Wire1.requestFrom(_i2caddr, (uint8_t)3);
+  uint16_t stat = Wire1.read();
   stat <<= 8;
-  stat |= Wire.read();
-  Serial.println(stat, HEX);
+  stat |= Wire1.read();
+  // Serial.println(stat, HEX);
   return stat;
 }
 
@@ -72,11 +72,11 @@ boolean Adafruit_SHT31::readTempHum(void) {
   writeCommand(SHT31_MEAS_HIGHREP);
 
   delay(500);
-  Wire.requestFrom(_i2caddr, (uint8_t)6);
-  if (Wire.available() != 6)
+  Wire1.requestFrom(_i2caddr, (uint8_t)6);
+  if (Wire1.available() != 6)
     return false;
   for (uint8_t i=0; i<6; i++) {
-    readbuffer[i] = Wire.read();
+    readbuffer[i] = Wire1.read();
   //  Serial.print("0x"); Serial.println(readbuffer[i], HEX);
   }
   uint16_t ST, SRH;
@@ -110,10 +110,10 @@ boolean Adafruit_SHT31::readTempHum(void) {
 }
 
 void Adafruit_SHT31::writeCommand(uint16_t cmd) {
-  Wire.beginTransmission(_i2caddr);
-  Wire.write(cmd >> 8);
-  Wire.write(cmd & 0xFF);
-  Wire.endTransmission();
+  Wire1.beginTransmission(_i2caddr);
+  Wire1.write(cmd >> 8);
+  Wire1.write(cmd & 0xFF);
+  Wire1.endTransmission();
 }
 
 uint8_t Adafruit_SHT31::crc8(const uint8_t *data, int len)

@@ -191,7 +191,7 @@ U 1 1 596665A1
 P 3050 1250
 F 0 "J2" H 3050 1700 50  0000 C TNN
 F 1 "Arduino" V 2900 1250 50  0000 C TNN
-F 2 "Connectors_Terminal_Blocks:TerminalBlock_Pheonix_MPT-2.54mm_6pol" H 3050 825 50  0001 C CNN
+F 2 "Connectors_Terminal_Blocks:TerminalBlock_Pheonix_MPT-2.54mm_10pol" H 3050 825 50  0001 C CNN
 F 3 "" H 3025 1450 50  0001 C CNN
 	1    3050 1250
 	0    1    1    0   
@@ -235,12 +235,8 @@ Wire Wire Line
 Wire Wire Line
 	4250 1600 4200 1600
 Wire Wire Line
-	4200 1600 4200 1100
-Wire Wire Line
 	4200 1100 3750 1100
 Connection ~ 3750 1100
-Wire Wire Line
-	1650 1000 2350 1000
 Wire Wire Line
 	2350 800  2350 1450
 Wire Wire Line
@@ -267,7 +263,6 @@ Wire Wire Line
 	1850 1500 1750 1500
 Wire Wire Line
 	2350 1450 2250 1450
-Connection ~ 2350 1000
 Connection ~ 2350 1450
 Wire Wire Line
 	2150 1450 1550 1450
@@ -310,4 +305,16 @@ Wire Wire Line
 Wire Wire Line
 	1450 2200 1450 2800
 Connection ~ 4750 3350
+Wire Wire Line
+	1650 1000 3750 1000
+Connection ~ 3750 1000
+Wire Wire Line
+	4250 1600 4250 1400
+Wire Wire Line
+	4250 1400 4300 1400
+Wire Wire Line
+	4300 1400 4300 950 
+Wire Wire Line
+	4300 950  2350 950 
+Connection ~ 2350 950 
 $EndSCHEMATC
