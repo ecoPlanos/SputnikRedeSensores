@@ -13,30 +13,30 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SPUTNIKTEMPRH_H_
-#define SPUTNIKTEMPRH_H_
+#ifndef SPUTNIKCONFIG_H_
+#define SPUTNIKCONFIG_H_
 
-#include <Wire.h>
-////////////////
-#include <DHT.h>
-#include <Adafruit_SHT31.h>
-#include <Sensirion.h>    //SHT75
+#include <Arduino.h>
 
-#define DHT11_PIN            2         // Pin which is connected to the DHT sensor.
-#define DHT22_PIN            3         // Pin which is connected to the DHT sensor.
-#define SHT75_SCK            5         //
-#define SHT75_DATA           6         //
-#define THR_LED              25
+#define SOFTWARE_VERSION      100
+#define INITIAL_DELAY         100
+#define SENSORS_READ_INTERVAL 1000 //Sensors read minimum interval (ms)
 
-#define SHT31_OFFSET  0
+#define SD_CHIP_SEL           4
 
-extern DHT dht11, dht22;
-extern Adafruit_SHT31 sht31;
-extern Sensirion sht75;
+#define SD_CARD_DELAY         500
+#define SD_MAX_TRIES          3
+#define SERIAL_DELAY         500
+#define SERIAL_MAX_TRIES      3
 
-extern uint8_t dht11_error,dht22_error,sht31_error,sht75_error;
+#define LOG_SD
+#define LOG_SERIAL
+#define SERIAL_DEBUG
 
-void temp_hr_init(void);
-void temp_hr_sensors_check(void);
+const String log_file_sufix="Data.csv";
+const String config_file_name="SPUTNIK.CFG";
 
-#endif // SPUTNIKTEMPRH_H_
+const char* ssid = "SSID";
+const char* password = "PASS";
+
+#endif // SPUTNIKCONFIG_H_

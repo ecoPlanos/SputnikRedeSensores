@@ -23,25 +23,10 @@
 // #include <ESP8266WebServer.h>
 // #include <ESP8266FtpServer.h>
 ////////////////////
+#include "../../../SputnikConfig.h"
 #include "SputnikTempRH.h"
 #include "SputnikTemp.h"
 ////////////////////
-#define INITIAL_DELAY         100
-#define SENSORS_READ_INTERVAL 1000 //Sensors read minimum interval (ms)
-
-#define SD_CHIP_SEL           4
-
-#define SD_CARD_DELAY         500
-#define SD_MAX_TRIES          3
-
-#define LOG_SD
-#define LOG_SERIAL
-
-const String log_file_sufix="Data.csv";
-const String config_file_name="SPUTNIK.CFG";
-
-const char* ssid = "SSID";
-const char* password = "PASS";
 
 uint32_t millis_start, millis_end, setup_time, acquisition_time;
 uint32_t delayMS;

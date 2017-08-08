@@ -13,30 +13,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SPUTNIKTEMPRH_H_
-#define SPUTNIKTEMPRH_H_
+#ifndef SPUTNIKTEMP_H_
+#define SPUTNIKTEMP_H_
 
-#include <Wire.h>
-////////////////
-#include <DHT.h>
-#include <Adafruit_SHT31.h>
-#include <Sensirion.h>    //SHT75
+#include <Adafruit_MLX90614.h>
 
-#define DHT11_PIN            2         // Pin which is connected to the DHT sensor.
-#define DHT22_PIN            3         // Pin which is connected to the DHT sensor.
-#define SHT75_SCK            5         //
-#define SHT75_DATA           6         //
-#define THR_LED              25
+extern Adafruit_MLX90614 mlx;
 
-#define SHT31_OFFSET  0
+extern uint8_t mlx_error;
 
-extern DHT dht11, dht22;
-extern Adafruit_SHT31 sht31;
-extern Sensirion sht75;
+void temp_init(void);
+void temp_sensors_check(void);
 
-extern uint8_t dht11_error,dht22_error,sht31_error,sht75_error;
-
-void temp_hr_init(void);
-void temp_hr_sensors_check(void);
-
-#endif // SPUTNIKTEMPRH_H_
+#endif // SPUTNIKTEMP_H_
