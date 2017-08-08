@@ -28,10 +28,15 @@
 #define SHT75_DATA           6         //
 #define THR_LED              25
 
+#define SHT31_OFFSET  0.3
+
 extern DHT dht11, dht22;
 extern Adafruit_SHT31 sht31;
 extern Sensirion sht75;
 
+extern uint8_t dht11_error,dht22_error,sht31_error,sht75_error;
+
 void temp_hr_init(void);
+void temp_hr_sensors_check(void);
 
 #endif // SPUTNIKTEMPRH_H_

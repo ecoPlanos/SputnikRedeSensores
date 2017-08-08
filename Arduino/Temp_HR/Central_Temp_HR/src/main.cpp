@@ -26,16 +26,13 @@
 #include "SputnikTempRH.h"
 #include "SputnikTemp.h"
 ////////////////////
-//#include "SputinkRedeSensores.h"
-#define INITIAL_DELAY 100
-// #define SENSORS_READ_INTERVAL 10000 //Sensors read minimum interval (ms)
+#define INITIAL_DELAY         100
 #define SENSORS_READ_INTERVAL 1000 //Sensors read minimum interval (ms)
 
-#define SD_CHIP_SEL          4//10
-#define SD2_CHIP_SEL          10
+#define SD_CHIP_SEL           4
 
-#define SD_CARD_DELAY 500
-#define SD_MAX_TRIES 3
+#define SD_CARD_DELAY         500
+#define SD_MAX_TRIES          3
 
 #define LOG_SD
 #define LOG_SERIAL
@@ -50,7 +47,7 @@ uint32_t millis_start, millis_end, setup_time, acquisition_time;
 uint32_t delayMS;
 uint8_t thr_led_state;
 
-uint8_t sd_present;
+uint8_t sd_present, log_file_opened, config_file_opened, report_file_opened;
 String log_file_name, report_file_name;
 
 void sd_card_init(void);
@@ -60,14 +57,15 @@ void sensors_sleep(void);
 Sd2Card card;
 SdVolume volume;
 SdFile root;
-File log_file, config_file, report_file, test_file;
+File log_file, config_file, report_file;
 
 DS1302 rtc(52, 50, 48);
 Time t;
 
 void setup() {
   millis_start = millis();
-
+  Wire.begin();
+  Wire1.begin();
   Serial.begin(115200);
   #ifdef LOG_SERIAL
   Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
@@ -90,8 +88,10 @@ void setup() {
 
   report_file_name ="REPORT.LOG";
   log_file_name = String(t.year)+"/"+String(t.mon)+"/"+String(t.date)+"/"+String(t.hour)+"H"+String(t.min)+"M"+String(t.sec)+".CSV";
-
+  sd_present=false;
+  #ifdef LOG_SD
   sd_card_init();
+  #endif
   delay(SD_CARD_DELAY);
   if(sd_present)
   {
@@ -110,21 +110,15 @@ void setup() {
       report_file.println(String(t.year)+"/"+String(t.mon)+"/"+String(t.date)+"/"+String(t.hour)+"H"+String(t.min)+"M"+String(t.sec));
       report_file.println("Starting new acquisition");
       report_file.close();
+      report_file_opened=true;
     }
     else
     {
       #ifdef LOG_SERIAL
       Serial.println("Error: can't open system log file!!!");
       #endif
+      report_file_opened=false;
     }
-    test_file = SD2.open("test.txt",FILE_WRITE);
-    if(test_file)
-    {
-      test_file.println("YEI!");
-      test_file.close();
-    }
-    else
-      Serial.print("ERROR: Can't open file test.txt!!!");
   }
   // Read configuration from SD card
   if(sd_present)
@@ -138,15 +132,21 @@ void setup() {
       while (config_file.available()) {
         delayMSstr+=config_file.read();
       }
+      #ifdef LOG_SERIAL
+      Serial.print("Config file content string: ");
+      Serial.println(delayMSstr);
+      #endif
       // delayMS = delayMSstr.toInt();
       // Serial.println(delayMSstr);
       //  Set delay between sensor readings based on sensor details.
+      config_file_opened=true;
     }
     else
     {
       #ifdef LOG_SERIAL
       Serial.println("Error: can't open configuration file!!!");
       #endif
+      config_file_opened=false;
     }
   }
   // delayMS = (SENSORS_READ_INTERVAL > delayMS) ? SENSORS_READ_INTERVAL : delayMS;
@@ -162,24 +162,20 @@ void setup() {
       report_file.print("Logging interval: ");
       report_file.println(delayMS);
       report_file.close();
+      report_file_opened=true;
     }
     else
     {
       #ifdef LOG_SERIAL
       Serial.println("Error: can't open system log file!!!");
       #endif
+      report_file_opened=false;
     }
   }
   delay(INITIAL_DELAY);
-  // Initialize DHTs.
+  // Initialize temperature and RH sensors.
   temp_hr_init();
-  //  Initialize SHT31
-  if (! sht31.begin(0x44)) {   // Set to 0x45 for alternate i2c addr
-    #ifdef LOG_SERIAL
-    Serial.println("Couldn't find SHT31");
-    #endif
-  }
-  //  Initialize Temperature Sensors
+  //  Initialize temperature sensors
   temp_init();
   millis_end = millis();
   #ifdef LOG_SERIAL
@@ -233,6 +229,7 @@ void loop() {
   #endif
 
   if (isnan(dht11.readTemperature(false,true))) {
+    dht11_error = 1;
     #ifdef LOG_SERIAL
     Serial.println("Error reading DHT11 temperature!");
     #endif
@@ -248,6 +245,7 @@ void loop() {
   }
   // Get humidity event and print its value.
   if (isnan(dht11.readHumidity(true))) {
+    dht11_error = 1;
     #ifdef LOG_SERIAL
     Serial.println("Error reading DHT11 humidity!");
     #endif
@@ -263,6 +261,7 @@ void loop() {
   }
 
   if (isnan(dht22.readTemperature(false,true))) {
+    dht22_error = 1;
     #ifdef LOG_SERIAL
     Serial.println("Error reading DHT22 temperature!");
     #endif
@@ -271,13 +270,14 @@ void loop() {
   else {
     #ifdef LOG_SERIAL
     Serial.print("DHT22 Temp: ");
-    Serial.print(dht11.getTemperature());
+    Serial.print(dht22.getTemperature());
     Serial.println(" *C");
     #endif
     sd_data_string+=String(dht22.getTemperature())+",";
   }
   // Get humidity event and print its value.
   if (isnan(dht22.readHumidity(true))) {
+    dht22_error = 1;
     #ifdef LOG_SERIAL
     Serial.println("Error reading DHT22 humidity!");
     #endif
@@ -289,10 +289,10 @@ void loop() {
     Serial.print(dht22.getHumidity());
     Serial.println("%");
     #endif
-    sd_data_string+=String(dht11.getHumidity())+",";
+    sd_data_string+=String(dht22.getHumidity())+",";
   }
 
-  float sht31_temp = sht31.readTemperature();
+  float sht31_temp = sht31.readTemperature()-SHT31_OFFSET;
   float sht31_hr = sht31.readHumidity();
 
   if (! isnan(sht31_temp)) {  // check if 'is not a number'
@@ -303,6 +303,7 @@ void loop() {
     #endif
     sd_data_string+=String(sht31_temp)+",";
   } else {
+    sht31_error=1;
     #ifdef LOG_SERIAL
     Serial.println("Error reading SHT31 temperature!");
     #endif
@@ -317,6 +318,7 @@ void loop() {
     #endif
     sd_data_string+=String(sht31_hr)+",";
   } else {
+    sht31_error = 1;
     #ifdef LOG_SERIAL
     Serial.println("Error reading SHT31 humidity!");
     #endif
@@ -334,6 +336,7 @@ void loop() {
     #endif
     sd_data_string+=String(sht75_temp)+",";
   } else {
+    sht75_error = 1;
     #ifdef LOG_SERIAL
     Serial.println("Error reading SHT75 temperature!");
     #endif
@@ -348,6 +351,7 @@ void loop() {
     #endif
     sd_data_string+=String(sht75_hr)+",";
   } else {
+    sht75_error = 1;
     #ifdef LOG_SERIAL
     Serial.println("Error reading SHT75 humidity!");
     #endif
@@ -372,7 +376,7 @@ void loop() {
   float mlx_t_amb = mlx.readAmbientTempC();
   float mlx_t_obj = mlx.readObjectTempC();
 
-  if (! isnan(mlx_t_amb)) {  // check if 'is not a number'
+  if ((!isnan(mlx_t_amb))&&(mlx_t_amb>-200.15)&&(mlx_t_obj>-200.15)) {  // check if 'is not a number'
     #ifdef LOG_SERIAL
     Serial.print("MLX90614 Ambient Temp: ");
     Serial.print(mlx_t_amb);
@@ -384,6 +388,7 @@ void loop() {
     sd_data_string+=String(mlx_t_amb)+",";
     sd_data_string+=String(mlx_t_obj)+",";
   } else {
+    mlx_error = 1;
     #ifdef LOG_SERIAL
     Serial.println("Error reading MLX90614 temperature!");
     #endif
@@ -415,6 +420,14 @@ void loop() {
   }
   sd_data_string+=String(thermopar.temperature_cjt)+","+String(thermopar.temperature_raw)+",";
 
+  pt100_temp=analogRead(PT100_PIN);
+  #ifdef LOG_SERIAL
+  Serial.print("PT100 Temp: ");
+  Serial.print(pt100_temp);
+  Serial.println(" Analog value");
+  #endif
+  sd_data_string+=String(pt100_temp)+",";
+
   ntc_temp=analogRead(NTC_PIN);
   #ifdef LOG_SERIAL
   Serial.print("NTC Temp: ");
@@ -423,6 +436,7 @@ void loop() {
   #endif
   sd_data_string+=String(ntc_temp)+",";
 
+  #ifdef LOG_SD
   // Log to SD card
   if(sd_present)
   {
@@ -440,10 +454,18 @@ void loop() {
       #ifdef LOG_SERIAL
       Serial.println("error opening "+log_file_name);
       #endif
-      sd_card_init();
     }
   }
-  // Delay between measurements.
+  #endif
+  #ifdef LOG_SERIAL
+  Serial.print("Cheking sensors for errors: ");
+  Serial.println(String(dht11_error)+","+String(dht22_error)+","+String(sht31_error)+","+String(sht75_error)+","+String(mlx_error));
+  #endif
+  #ifdef LOG_SD
+  //TODO: log sensor errors to SD card.
+  #endif
+  temp_sensors_check();
+  temp_hr_sensors_check();
   sensors_sleep();
   thr_led_state = ~thr_led_state;
   digitalWrite(THR_LED,thr_led_state);
@@ -504,12 +526,12 @@ void loop() {
       }
     }
   }
+  // Delay between measurements.
   delay(delayMS-acquisition_time);
 }
 
 void sd_card_init(void)
 {
-  //SD2.begin(SD2_CHIP_SEL);
   uint8_t sd_card_failures = 0;
   while(sd_card_failures < SD_MAX_TRIES)
   {
@@ -527,28 +549,6 @@ void sd_card_init(void)
      {
        #ifdef LOG_SERIAL
        Serial.println("SD card initialized.");
-       #endif
-       sd_present=true;
-       break;
-     }
-  }
-  sd_card_failures = 0;
-  while(sd_card_failures < SD_MAX_TRIES)
-  {
-    sd_card_failures++;
-    if (!SD2.begin(SD2_CHIP_SEL))
-     {
-       #ifdef LOG_SERIAL
-       Serial.print("Card 2 failed, or not present -> try ");
-       Serial.println(sd_card_failures);
-       #endif
-       sd_present=false;
-       delay(500);
-     }
-     else
-     {
-       #ifdef LOG_SERIAL
-       Serial.println("SD card 2 initialized.");
        #endif
        sd_present=true;
        break;
