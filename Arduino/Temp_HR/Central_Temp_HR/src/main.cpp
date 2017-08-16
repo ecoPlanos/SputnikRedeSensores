@@ -24,13 +24,16 @@
 // #include <ESP8266FtpServer.h>
 ////////////////////
 #include "../../../SputnikConfig.h"
+#include "SputnikComm.h"
 #include "SputnikTempRH.h"
 #include "SputnikTemp.h"
 ////////////////////
 
 uint32_t millis_start, millis_end, setup_time, acquisition_time;
-uint32_t delayMS;
+uint32_t delayMs;
 uint8_t thr_led_state;
+
+uint8_t i = 0;
 
 uint8_t sd_present, log_file_opened, config_file_opened, report_file_opened;
 String log_file_name, report_file_name;
@@ -51,8 +54,13 @@ void setup() {
   millis_start = millis();
   Wire.begin();
   Wire1.begin();
+  SPI.begin();
   Serial.begin(115200);
-  #ifdef LOG_SERIAL
+  Serial1.begin(115200);  // Start ESP wifi communication interface
+  #ifdef REMOTE_ACTIVE
+  Serial2.begin(115200);  // Start communication interface with remote sensors
+  #endif
+  #ifdef SERIAL_DEBUG
   Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
   Serial.println(".i.SputnikRedeSensores by ecoPlanos.i.");
   Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
@@ -99,7 +107,7 @@ void setup() {
     }
     else
     {
-      #ifdef LOG_SERIAL
+      #ifdef SERIAL_DEBUG
       Serial.println("Error: can't open system log file!!!");
       #endif
       report_file_opened=false;
@@ -110,48 +118,49 @@ void setup() {
   {
     config_file = SD.open(config_file_name, FILE_READ);
     if (config_file) {
-      #ifdef LOG_SERIAL
+      #ifdef SERIAL_DEBUG
       Serial.println("Config file successfuly open");
       #endif
       String delayMSstr = "";
       while (config_file.available()) {
         delayMSstr+=config_file.read();
       }
-      #ifdef LOG_SERIAL
+      #ifdef SERIAL_DEBUG
       Serial.print("Config file content string: ");
       Serial.println(delayMSstr);
       #endif
-      // delayMS = delayMSstr.toInt();
+      // delayMs = delayMSstr.toInt();
       // Serial.println(delayMSstr);
       //  Set delay between sensor readings based on sensor details.
       config_file_opened=true;
     }
     else
     {
-      #ifdef LOG_SERIAL
+      #ifdef SERIAL_DEBUG
       Serial.println("Error: can't open configuration file!!!");
       #endif
       config_file_opened=false;
     }
   }
-  // delayMS = (SENSORS_READ_INTERVAL > delayMS) ? SENSORS_READ_INTERVAL : delayMS;
-  delayMS = SENSORS_READ_INTERVAL;
-  #ifdef LOG_SERIAL
+  // delayMs = (SENSORS_READ_INTERVAL > delayMs) ? SENSORS_READ_INTERVAL : delayMs;
+  delayMs = (uint32_t)SENSORS_READ_INTERVAL;
+  #ifdef SERIAL_DEBUG
     Serial.print("Logging interval: ");
-    Serial.println(delayMS);
+    Serial.println(delayMs);
   #endif
+
   if(sd_present)
   {
     report_file = SD.open(report_file_name, FILE_WRITE);
     if (report_file) {
       report_file.print("Logging interval: ");
-      report_file.println(delayMS);
+      report_file.println(delayMs);
       report_file.close();
       report_file_opened=true;
     }
     else
     {
-      #ifdef LOG_SERIAL
+      #ifdef SERIAL_DEBUG
       Serial.println("Error: can't open system log file!!!");
       #endif
       report_file_opened=false;
@@ -163,7 +172,7 @@ void setup() {
   //  Initialize temperature sensors
   temp_init();
   millis_end = millis();
-  #ifdef LOG_SERIAL
+  #ifdef SERIAL_DEBUG
   Serial.print("millis_start: ");
   Serial.println(millis_start);
   Serial.print("millis_end: ");
@@ -177,7 +186,7 @@ void setup() {
   {
     setup_time = 0XFFFFFFFF-millis_start+millis_end;
   }
-  #ifdef LOG_SERIAL
+  #ifdef SERIAL_DEBUG
   Serial.print("Setup time: ");
   if(setup_time >= 60000)
   {
@@ -199,7 +208,13 @@ void setup() {
 
 void loop() {
   millis_start = millis();
+  #ifdef REMOTE_ACTIVE
+  Serial2.write(REMOTE_START);  // Prompt remote sensors for data
+  #endif
+  Serial2.write('\r');
+  Serial2.write('\n');  // Prompt remote sensors for data
   String sd_data_string = "";
+  String sd_data_string_tmp = "";
 
   sensors_awake();
   #ifdef LOG_SD
@@ -207,7 +222,7 @@ void loop() {
     sd_card_init();
   #endif
   sd_data_string+=String(millis_start)+",";
-  #ifdef LOG_SERIAL
+  #ifdef SERIAL_DEBUG
   Serial.println("------------------------------------");
   Serial.println("----------------T&RH----------------");
   Serial.println("------------------------------------");
@@ -215,13 +230,13 @@ void loop() {
 
   if (isnan(dht11.readTemperature(false,true))) {
     dht11_error = 1;
-    #ifdef LOG_SERIAL
+    #ifdef SERIAL_DEBUG
     Serial.println("Error reading DHT11 temperature!");
     #endif
     sd_data_string+=",";
   }
   else {
-    #ifdef LOG_SERIAL
+    #ifdef SERIAL_DEBUG
     Serial.print("DHT11 Temp: ");
     Serial.print(dht11.getTemperature());
     Serial.println(" *C");
@@ -231,13 +246,13 @@ void loop() {
   // Get humidity event and print its value.
   if (isnan(dht11.readHumidity(true))) {
     dht11_error = 1;
-    #ifdef LOG_SERIAL
+    #ifdef SERIAL_DEBUG
     Serial.println("Error reading DHT11 humidity!");
     #endif
     sd_data_string+=",";
   }
   else {
-    #ifdef LOG_SERIAL
+    #ifdef SERIAL_DEBUG
     Serial.print("DHT11 RH: ");
     Serial.print(dht11.getHumidity());
     Serial.println("%");
@@ -247,13 +262,13 @@ void loop() {
 
   if (isnan(dht22.readTemperature(false,true))) {
     dht22_error = 1;
-    #ifdef LOG_SERIAL
+    #ifdef SERIAL_DEBUG
     Serial.println("Error reading DHT22 temperature!");
     #endif
     sd_data_string+=",";
   }
   else {
-    #ifdef LOG_SERIAL
+    #ifdef SERIAL_DEBUG
     Serial.print("DHT22 Temp: ");
     Serial.print(dht22.getTemperature());
     Serial.println(" *C");
@@ -263,13 +278,13 @@ void loop() {
   // Get humidity event and print its value.
   if (isnan(dht22.readHumidity(true))) {
     dht22_error = 1;
-    #ifdef LOG_SERIAL
+    #ifdef SERIAL_DEBUG
     Serial.println("Error reading DHT22 humidity!");
     #endif
     sd_data_string+=",";
   }
   else {
-    #ifdef LOG_SERIAL
+    #ifdef SERIAL_DEBUG
     Serial.print("DHT22 RH: ");
     Serial.print(dht22.getHumidity());
     Serial.println("%");
@@ -277,136 +292,64 @@ void loop() {
     sd_data_string+=String(dht22.getHumidity())+",";
   }
 
-  float sht31_temp = sht31.readTemperature()-SHT31_OFFSET;
-  float sht31_hr = sht31.readHumidity();
-
-  if (! isnan(sht31_temp)) {  // check if 'is not a number'
-    #ifdef LOG_SERIAL
-    Serial.print("SHT31 Temp: ");
-    Serial.print(sht31_temp);
-    Serial.println(" *C");
-    #endif
-    sd_data_string+=String(sht31_temp)+",";
-  } else {
-    sht31_error=1;
-    #ifdef LOG_SERIAL
-    Serial.println("Error reading SHT31 temperature!");
-    #endif
-    sd_data_string+=",";
-  }
-
-  if (! isnan(sht31_hr)) {  // check if 'is not a number'
-    #ifdef LOG_SERIAL
-    Serial.print("SHT31 RH: ");
-    Serial.print(sht31_hr);
-    Serial.println("%");
-    #endif
-    sd_data_string+=String(sht31_hr)+",";
-  } else {
-    sht31_error = 1;
-    #ifdef LOG_SERIAL
-    Serial.println("Error reading SHT31 humidity!");
-    #endif
-    sd_data_string+=",";
-  }
-
   float sht75_temp, sht75_hr, sht75_dewpoint;
   sht75.measure(&sht75_temp, &sht75_hr, &sht75_dewpoint);
 
-  if (! isnan(sht75_temp)) {  // check if 'is not a number'
-    #ifdef LOG_SERIAL
+  if(!isnan(sht75_hr)&&((sht75_hr!=0.0)&&(sht75_temp!=0.0)))
+  {
+    #ifdef SERIAL_DEBUG
     Serial.print("SHT75 Temp: ");
     Serial.print(sht75_temp);
     Serial.println(" *C");
-    #endif
-    sd_data_string+=String(sht75_temp)+",";
-  } else {
-    sht75_error = 1;
-    #ifdef LOG_SERIAL
-    Serial.println("Error reading SHT75 temperature!");
-    #endif
-    sd_data_string+=",";
-  }
-
-  if (! isnan(sht75_hr)) {  // check if 'is not a number'
-    #ifdef LOG_SERIAL
     Serial.print("SHT75 RH: ");
     Serial.print(sht75_hr);
     Serial.println("%");
     #endif
     sd_data_string+=String(sht75_hr)+",";
-  } else {
-    sht75_error = 1;
-    #ifdef LOG_SERIAL
-    Serial.println("Error reading SHT75 humidity!");
+    sd_data_string+=String(sht75_temp)+",";
+    sd_data_string+=String(sht75_dewpoint)+",";
+  }
+  else
+  {
+    #ifdef SERIAL_DEBUG
+    Serial.println("Error reading SHT75 data!");
     #endif
     sd_data_string+=",";
+    sht75_error = 1;
   }
+
   if (! isnan(sht75_dewpoint)) {  // check if 'is not a number'
-    #ifdef LOG_SERIAL
+    #ifdef SERIAL_DEBUG
     Serial.print("SHT75 Dewpoint: ");
     Serial.print(sht75_dewpoint);
     Serial.println("C");
     #endif
   } else {
-    #ifdef LOG_SERIAL
+    #ifdef SERIAL_DEBUG
     Serial.println("Error reading SHT75 humidity!");
     #endif
   }
-  #ifdef LOG_SERIAL
+  #ifdef SERIAL_DEBUG
   Serial.println("------------------------------------");
   Serial.println("----------------TEMP----------------");
   Serial.println("------------------------------------");
   #endif
-  float mlx_t_amb = mlx.readAmbientTempC();
-  float mlx_t_obj = mlx.readObjectTempC();
-
-  if ((!isnan(mlx_t_amb))&&(mlx_t_amb>-200.15)&&(mlx_t_obj>-200.15)) {  // check if 'is not a number'
-    #ifdef LOG_SERIAL
-    Serial.print("MLX90614 Ambient Temp: ");
-    Serial.print(mlx_t_amb);
-    Serial.println(" *C");
-    Serial.print("MLX90614 Object Temp: ");
-    Serial.print(mlx_t_obj);
-    Serial.println(" *C");
-    #endif
-    sd_data_string+=String(mlx_t_amb)+",";
-    sd_data_string+=String(mlx_t_obj)+",";
-  } else {
-    mlx_error = 1;
-    #ifdef LOG_SERIAL
-    Serial.println("Error reading MLX90614 temperature!");
-    #endif
-    sd_data_string+=",,";
-  }
-  thermopar.readCJT();
-  if (!isnan(thermopar.temperature_cjt)) {
-    #ifdef LOG_SERIAL
-    Serial.print("Thermopar CJT temp: ");
-    Serial.print(thermopar.temperature_cjt);
-    Serial.println(" *C");
-    #endif
-  }
-  else
-  {
-    sd_data_string+=",";
-  }
-  thermopar.readTempC();
-  if (!isnan(thermopar.temperature_c)) {
-    #ifdef LOG_SERIAL
-    Serial.print("Thermopar temp: ");
-    Serial.print(thermopar.temperature_c);
-    Serial.println(" *C");
-    #endif
-  }
-  else
-  {
-    sd_data_string+=",";
-  }
-  sd_data_string+=String(thermopar.temperature_cjt)+","+String(thermopar.temperature_raw)+",";
+  //
+  // thermopar.readCJT();
+  // if (!isnan(thermopar.temperature_cjt)) {
+  //   #ifdef SERIAL_DEBUG
+  //   Serial.print("Thermopar CJT temp: ");
+  //   Serial.print(thermopar.temperature_cjt);
+  //   Serial.println(" *C");
+  //   #endif
+  // }
+  // else
+  // {
+  //   sd_data_string+=",";
+  // }
 
   pt100_temp=analogRead(PT100_PIN);
-  #ifdef LOG_SERIAL
+  #ifdef SERIAL_DEBUG
   Serial.print("PT100 Temp: ");
   Serial.print(pt100_temp);
   Serial.println(" Analog value");
@@ -414,13 +357,107 @@ void loop() {
   sd_data_string+=String(pt100_temp)+",";
 
   ntc_temp=analogRead(NTC_PIN);
-  #ifdef LOG_SERIAL
+  #ifdef SERIAL_DEBUG
   Serial.print("NTC Temp: ");
   Serial.print(ntc_temp);
   Serial.println(" Analog value");
   #endif
   sd_data_string+=String(ntc_temp)+",";
+  #ifdef REMOTE_ACTIVE
+  #ifdef SERIAL_DEBUG
+  Serial.println("------------------------------------");
+  Serial.println("---------------REMOTE---------------");
+  Serial.println("------------------------------------");
+  #endif
+  uint32_t temp_millis = millis();
+  uint32_t temp_delay;
+  if(temp_millis > millis_start)
+  {
+    temp_delay = temp_millis-millis_start;
+  }
+  else
+  {
+    temp_delay = 0XFFFFFFFF-millis_start+temp_millis;
+  }
 
+  //Wait for data on serial bus
+  while((Serial2.available()<=0)&&(temp_delay<(delayMs-1000)))
+  {
+    temp_millis = millis();
+    if(temp_millis > millis_start)
+    {
+      temp_delay = temp_millis-millis_start;
+    }
+    else
+    {
+      temp_delay = 0XFFFFFFFF-millis_start+temp_millis;
+    }
+  }
+
+  if(Serial2.available()>0)
+  {
+    while(Serial2.available()>0)
+    {
+      serial_char = Serial2.read();
+      if((char)serial_char == (char)REMOTE_START)
+      {
+        i++;
+      }
+      else if((char)serial_char != (char)REMOTE_END)
+      {
+        if(i>0)
+        {
+          sd_data_string_tmp+=String(serial_char);
+        }
+        else
+        {
+          #ifdef SERIAL_DEBUG
+          Serial.print("Warning, received wrong start! ");
+          Serial.println(String(serial_char));
+          #endif
+          Serial2.flush();
+        }
+      }
+      else
+      {
+        if(i>0)
+        {
+          #ifdef SERIAL_DEBUG
+          Serial.print("Message received from remote base: ");
+          Serial.println(sd_data_string_tmp);
+          #endif
+        }
+        else
+        {
+          #ifdef SERIAL_DEBUG
+          Serial.println("Error, received termination character out of order.");
+          #endif
+          Serial2.flush();
+          i=0;
+        }
+      }
+    }
+  }
+  else
+  {
+    if(i==0)
+    {
+      #ifdef SERIAL_DEBUG
+      Serial.println("Warning: Timeout wainting for remote sensors!");
+      #endif
+      sd_data_string+=",,,,";
+    }
+    else
+    {
+      sd_data_string += sd_data_string_tmp;
+      #ifdef SERIAL_DEBUG
+      Serial.print("Final data string: ");
+      Serial.println(sd_data_string);
+      #endif
+      i=0;
+    }
+  }
+  #endif
   #ifdef LOG_SD
   // Log to SD card
   if(sd_present)
@@ -430,20 +467,20 @@ void loop() {
       log_file.println(sd_data_string);
       log_file.close();
       // print to the serial port too:
-      #ifdef LOG_SERIAL
+      #ifdef SERIAL_DEBUG
       Serial.println("Logged data: "+sd_data_string);
       #endif
     }
     // if the file isn't open, pop up an error:
     else {
-      #ifdef LOG_SERIAL
+      #ifdef SERIAL_DEBUG
       Serial.println("error opening "+log_file_name);
       #endif
     }
   }
   #endif
-  #ifdef LOG_SERIAL
-  Serial.print("Cheking sensors for errors: ");
+  #ifdef SERIAL_DEBUG
+  Serial.print("Checking sensors for errors: ");
   Serial.println(String(dht11_error)+","+String(dht22_error)+","+String(sht31_error)+","+String(sht75_error)+","+String(mlx_error));
   #endif
   #ifdef LOG_SD
@@ -455,21 +492,21 @@ void loop() {
   thr_led_state = ~thr_led_state;
   digitalWrite(THR_LED,thr_led_state);
   millis_end = millis();
-  #ifdef LOG_SERIAL
+  #ifdef SERIAL_DEBUG
   Serial.print("millis_start: ");
   Serial.println(millis_start);
   Serial.print("millis_end: ");
   Serial.println(millis_end);
   #endif
   if(millis_end > millis_start)
- {
+  {
    acquisition_time = millis_end-millis_start;
- }
- else
- {
+  }
+  else
+  {
    acquisition_time = 0XFFFFFFFF-millis_start+millis_end;
- }
-  #ifdef LOG_SERIAL
+  }
+  #ifdef SERIAL_DEBUG
   Serial.print("Acquisition time: ");
   if(acquisition_time >= 60000)
   {
@@ -487,12 +524,13 @@ void loop() {
     Serial.println("ms");
   }
   #endif
-  if(acquisition_time >= delayMS)
+  if(acquisition_time >= delayMs)
   {
-    delayMS = ((uint8_t)(acquisition_time/1000))*1000+1000;
-    #ifdef LOG_SERIAL
+    // delayMs = ((uint8_t)(acquisition_time/1000))*1000+1000;
+    delayMs = acquisition_time;
+    #ifdef SERIAL_DEBUG
     Serial.print("Warning: Acquisition time forced to ");
-    Serial.print(delayMS);
+    Serial.print(delayMs);
     Serial.println(" ms");
     #endif
     if(sd_present)
@@ -500,19 +538,19 @@ void loop() {
       report_file = SD.open(report_file_name, FILE_WRITE);
       if (report_file) {
         report_file.print("Forced Logging interval: ");
-        report_file.println(delayMS);
+        report_file.println(delayMs);
         report_file.close();
       }
       else
       {
-        #ifdef LOG_SERIAL
+        #ifdef SERIAL_DEBUG
         Serial.println("Error: can't open system log file!!!");
         #endif
       }
     }
   }
   // Delay between measurements.
-  delay(delayMS-acquisition_time);
+  delay(delayMs-acquisition_time);
 }
 
 void sd_card_init(void)
@@ -523,7 +561,7 @@ void sd_card_init(void)
     sd_card_failures++;
     if (!SD.begin(SD_CHIP_SEL))
      {
-       #ifdef LOG_SERIAL
+       #ifdef SERIAL_DEBUG
        Serial.print("Card failed, or not present -> try ");
        Serial.println(sd_card_failures);
        #endif
@@ -532,7 +570,7 @@ void sd_card_init(void)
      }
      else
      {
-       #ifdef LOG_SERIAL
+       #ifdef SERIAL_DEBUG
        Serial.println("SD card initialized.");
        #endif
        sd_present=true;

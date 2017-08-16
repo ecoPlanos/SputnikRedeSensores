@@ -16,19 +16,14 @@
 #ifndef SPUTNIKTEMP_H_
 #define SPUTNIKTEMP_H_
 
-#include <Adafruit_MLX90614.h>
-#include <SparkFunMAX31855k.h>
+#include <Arduino.h>
 
 #define NTC_PIN 7
 #define PT100_PIN 8
-#define THERMOPAR_CS 10
-#define THERMOPAR_VCC 52
 
-extern Adafruit_MLX90614 mlx;
-extern SparkFunMAX31855k thermopar;
 extern uint16_t ntc_temp, pt100_temp;
 
-extern uint8_t ntc_error, mlx_error, thermopar_error;
+extern uint8_t ntc_error, mlx_error;
 
 void temp_init(void);
 void temp_sensors_check(void);

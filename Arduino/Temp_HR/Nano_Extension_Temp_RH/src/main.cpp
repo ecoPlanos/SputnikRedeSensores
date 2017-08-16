@@ -15,23 +15,27 @@
 
 ////////////////////
 #include "../../../SputnikConfig.h"
+#include "SputnikComm.h"
 #include "SputnikTempRH.h"
 #include "SputnikTemp.h"
 ////////////////////
 
 uint32_t millis_start, millis_end, setup_time, acquisition_time;
-uint32_t delayMS;
 uint8_t act_led_state;
+char serial_comand;
 
-uint8_t serial_on;
-
-void serial_init(void);
 void sensors_awake(void);
 void sensors_sleep(void);
 
 void setup() {
   millis_start = millis();
   Wire.begin();
+  //disable pullup resistors TODO: disable i2c internal pullups to work with MLX and SHT31
+  //digitalWrite(SDA, 0);
+  //digitalWrite(SCL, 0);
+  // digitalWrite(SDA, 1);
+  // digitalWrite(SCL, 1);
+
   Serial.begin(115200);
   #ifdef SERIAL_DEBUG
   Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
@@ -40,26 +44,15 @@ void setup() {
   Serial.println();
   #endif
 
-  pinMode(ACTIVITY_LED, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
   act_led_state = 0;
 
-  serial_on=false;
-  serial_init();
-
   delay(SERIAL_DELAY);
-
-  // delayMS = (SENSORS_READ_INTERVAL > delayMS) ? SENSORS_READ_INTERVAL : delayMS;
-  delayMS = SENSORS_READ_INTERVAL;
-  #ifdef SERIAL_DEBUG
-    Serial.print("Logging interval: ");
-    Serial.println(delayMS);
-  #endif
-
-  delay(INITIAL_DELAY);
   // Initialize temperature and RH sensors.
   temp_hr_init();
   //  Initialize temperature sensors
   temp_init();
+  delay(INITIAL_DELAY);
   millis_end = millis();
   #ifdef SERIAL_DEBUG
   Serial.print("millis_start: ");
@@ -96,153 +89,160 @@ void setup() {
 }
 
 void loop() {
-  millis_start = millis();
-  String serial_data_string = "";
-
-  sensors_awake();
-  #ifdef LOG_SERIAL
-  if(!serial_on)
-    serial_init();
-  #endif
-  serial_data_string+=String(millis_start)+",";
-  #ifdef SERIAL_DEBUG
-  Serial.println("------------------------------------");
-  Serial.println("----------------T&RH----------------");
-  Serial.println("------------------------------------");
-  #endif
-
-  float sht31_temp = sht31.readTemperature()-SHT31_OFFSET;
-  float sht31_hr = sht31.readHumidity();
-
-  if (! isnan(sht31_temp)) {  // check if 'is not a number'
-    #ifdef SERIAL_DEBUG
-    Serial.print("SHT31 Temp: ");
-    Serial.print(sht31_temp);
-    Serial.println(" *C");
-    #endif
-    serial_data_string+=String(sht31_temp)+",";
-  } else {
-    sht31_error=1;
-    #ifdef SERIAL_DEBUG
-    Serial.println("Error reading SHT31 temperature!");
-    #endif
-    serial_data_string+=",";
-  }
-
-  if (! isnan(sht31_hr)) {  // check if 'is not a number'
-    #ifdef SERIAL_DEBUG
-    Serial.print("SHT31 RH: ");
-    Serial.print(sht31_hr);
-    Serial.println("%");
-    #endif
-    serial_data_string+=String(sht31_hr)+",";
-  } else {
-    sht31_error = 1;
-    #ifdef SERIAL_DEBUG
-    Serial.println("Error reading SHT31 humidity!");
-    #endif
-    serial_data_string+=",";
-  }
-
-  #ifdef SERIAL_DEBUG
-  Serial.println("------------------------------------");
-  Serial.println("----------------TEMP----------------");
-  Serial.println("------------------------------------");
-  #endif
-  float mlx_t_amb = mlx.readAmbientTempC();
-  float mlx_t_obj = mlx.readObjectTempC();
-
-  if ((!isnan(mlx_t_amb))&&(mlx_t_amb>-200.15)&&(mlx_t_obj>-200.15)) {  // check if 'is not a number'
-    #ifdef SERIAL_DEBUG
-    Serial.print("MLX90614 Ambient Temp: ");
-    Serial.print(mlx_t_amb);
-    Serial.println(" *C");
-    Serial.print("MLX90614 Object Temp: ");
-    Serial.print(mlx_t_obj);
-    Serial.println(" *C");
-    #endif
-    serial_data_string+=String(mlx_t_amb)+",";
-    serial_data_string+=String(mlx_t_obj)+",";
-  } else {
-    mlx_error = 1;
-    #ifdef SERIAL_DEBUG
-    Serial.println("Error reading MLX90614 temperature!");
-    #endif
-    serial_data_string+=",,";
-  }
-
-  #ifdef LOG_SERIAL
-  // Log to serial output
-  if(serial_on)
+  if(Serial.available()>0)
   {
-    #ifdef SERIAL_DEBUG
-    Serial.println("Logged data: "+serial_data_string);
-    #endif
-    Serial.println(serial_data_string);
-  }
-  #endif
-  #ifdef SERIAL_DEBUG
-  Serial.print("Cheking sensors for errors: ");
-  Serial.println(String(sht31_error)+","+String(mlx_error));
-  #endif
-  temp_sensors_check();
-  temp_hr_sensors_check();
-  sensors_sleep();
-  act_led_state = ~act_led_state;
-  digitalWrite(ACTIVITY_LED,act_led_state);
-  millis_end = millis();
-  #ifdef SERIAL_DEBUG
-  Serial.print("millis_start: ");
-  Serial.println(millis_start);
-  Serial.print("millis_end: ");
-  Serial.println(millis_end);
-  #endif
-  if(millis_end > millis_start)
- {
-   acquisition_time = millis_end-millis_start;
- }
- else
- {
-   acquisition_time = 0XFFFFFFFF-millis_start+millis_end;
- }
-  #ifdef SERIAL_DEBUG
-  Serial.print("Acquisition time: ");
-  if(acquisition_time >= 60000)
-  {
-    Serial.print((uint8_t) (acquisition_time/60000));
-    Serial.println("m");
-  }
-  else if(acquisition_time >= 1000)
-  {
-    Serial.print((uint8_t) (acquisition_time/1000));
-    Serial.println("s");
-  }
-  else
-  {
-    Serial.print(acquisition_time);
-    Serial.println("ms");
-  }
-  #endif
-  if(acquisition_time >= delayMS)
-  {
-    delayMS = ((uint8_t)(acquisition_time/1000))*1000+1000;
-    #ifdef SERIAL_DEBUG
-    Serial.print("Warning: Acquisition time forced to ");
-    Serial.print(delayMS);
-    Serial.println(" ms");
-    #endif
-  }
-  // Delay between measurements.
-  delay(delayMS-acquisition_time);
-}
+    serial_comand = Serial.read();
+    if((uint8_t)serial_comand == (uint8_t)REMOTE_START)
+    {
+      millis_start = millis();
+      String serial_data_string = "";
+      sensors_awake();
+      // serial_data_string+=String(millis_start)+",";
+      #ifdef SERIAL_DEBUG
+      Serial.println("------------------------------------");
+      Serial.println("----------------T&RH----------------");
+      Serial.println("------------------------------------");
+      #endif
 
-void serial_init(void)
-{
-  uint8_t serial_failures = 0;
-  while(serial_failures < SERIAL_MAX_TRIES)
-  {
-    serial_failures++;
-    //TODO: implement serial protocol!
+      // float sht31_temp = sht31.readTemperature()-SHT31_OFFSET;
+      // float sht31_hr = sht31.readHumidity();
+      //
+      // if (! isnan(sht31_temp)) {  // check if 'is not a number'
+      //   #ifdef SERIAL_DEBUG
+      //   Serial.print("SHT31 Temp: ");
+      //   Serial.print(sht31_temp);
+      //   Serial.println(" *C");
+      //   #endif
+      //   serial_data_string+=String(sht31_temp)+",";
+      // } else {
+      //   sht31_error=1;
+      //   #ifdef SERIAL_DEBUG
+      //   Serial.println("Error reading SHT31 temperature!");
+      //   #endif
+      //   serial_data_string+=",";
+      // }
+      //
+      // if (! isnan(sht31_hr)) {  // check if 'is not a number'
+      //   #ifdef SERIAL_DEBUG
+      //   Serial.print("SHT31 RH: ");
+      //   Serial.print(sht31_hr);
+      //   Serial.println("%");
+      //   #endif
+      //   serial_data_string+=String(sht31_hr)+",";
+      // } else {
+      //   sht31_error = 1;
+      //   #ifdef SERIAL_DEBUG
+      //   Serial.println("Error reading SHT31 humidity!");
+      //   #endif
+      //   serial_data_string+=",";
+      // }
+
+      #ifdef SERIAL_DEBUG
+      Serial.println("------------------------------------");
+      Serial.println("----------------TEMP----------------");
+      Serial.println("------------------------------------");
+      #endif
+      float mlx_t_amb = mlx.readAmbientTempC();
+      float mlx_t_obj = mlx.readObjectTempC();
+
+      if ((!isnan(mlx_t_amb))&&(mlx_t_amb>-200.15)&&(mlx_t_obj>-200.15)) {  // check if 'is not a number'
+        #ifdef SERIAL_DEBUG
+        Serial.print("MLX90614 Ambient Temp: ");
+        Serial.print(mlx_t_amb);
+        Serial.println(" *C");
+        Serial.print("MLX90614 Object Temp: ");
+        Serial.print(mlx_t_obj);
+        Serial.println(" *C");
+        #endif
+        serial_data_string+=String(mlx_t_amb)+",";
+        serial_data_string+=String(mlx_t_obj)+",";
+      } else {
+        mlx_error = 1;
+        #ifdef SERIAL_DEBUG
+        Serial.println("Error reading MLX90614 temperature!");
+        #endif
+        serial_data_string+=",,";
+      }
+
+      // thermopar.readTempC();
+      // if (!isnan(thermopar.temperature_c)) {
+      //   #ifdef SERIAL_DEBUG
+      //   Serial.print("Thermopar temp: ");
+      //   Serial.print(thermopar.temperature_c);
+      //   Serial.println(" *C");
+      //   #endif
+      //   // sd_data_string+=String(thermopar.temperature_cjt)+","+String(thermopar.temperature_raw)+",";
+      //   serial_data_string+=String(thermopar.temperature_raw)+",";
+      // }
+      // else
+      // {
+      //   serial_data_string+=",";
+      // }
+
+      Serial.write(REMOTE_START);
+      Serial.print(serial_data_string);
+      Serial.write(REMOTE_END);
+
+      #ifdef SERIAL_DEBUG
+      Serial.println("Sent data: "+serial_data_string);
+      Serial.print("Cheking sensors for errors: ");
+      Serial.println(String(sht31_error)+","+String(mlx_error));
+      #endif
+      // Serial.write('\n');
+      //   }
+      //   Serial.flush(); //Clean any unprocessed requests
+      temp_sensors_check();
+      temp_hr_sensors_check();
+      sensors_sleep();
+      // act_led_state = ~act_led_state;
+      // digitalWrite(LED_BUILTIN,act_led_state);
+      millis_end = millis();
+      #ifdef SERIAL_DEBUG
+      Serial.print("millis_start: ");
+      Serial.println(millis_start);
+      Serial.print("millis_end: ");
+      Serial.println(millis_end);
+      #endif
+      if(millis_end > millis_start)
+      {
+        acquisition_time = millis_end-millis_start;
+      }
+      else
+      {
+        acquisition_time = 0XFFFFFFFF-millis_start+millis_end;
+      }
+      #ifdef SERIAL_DEBUG
+      Serial.print("Acquisition time: ");
+      if(acquisition_time >= 60000)
+      {
+        Serial.print((uint8_t) (acquisition_time/60000));
+        Serial.println("m");
+      }
+      else if(acquisition_time >= 1000)
+      {
+        Serial.print((uint8_t) (acquisition_time/1000));
+        Serial.println("s");
+      }
+      else
+      {
+        Serial.print(acquisition_time);
+        Serial.println("ms");
+      }
+      #endif
+    }
+    else
+    {
+      #ifdef SERIAL_DEBUG
+      Serial.print("Received invalid serial comand: ");
+      Serial.write(serial_comand);
+      Serial.println();
+      Serial.print("Expected data: ");
+      Serial.write(REMOTE_START);
+      Serial.println();
+      #endif
+    }
+    act_led_state = ~act_led_state;
+    digitalWrite(LED_BUILTIN,act_led_state);
   }
 }
 

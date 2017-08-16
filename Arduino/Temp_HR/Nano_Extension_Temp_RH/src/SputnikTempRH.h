@@ -21,7 +21,6 @@
 #include <Adafruit_SHT31.h>
 
 #define SHT31_OFFSET  0
-#define ACTIVITY_LED       25
 
 extern Adafruit_SHT31 sht31;
 

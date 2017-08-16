@@ -13,30 +13,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SPUTNIKCONFIG_H_
-#define SPUTNIKCONFIG_H_
+#ifndef SPUTNIKCOMM_H_
+#define SPUTNIKCOMM_H_
 
 #include <Arduino.h>
 
-#define SOFTWARE_VERSION      101
-#define INITIAL_DELAY         100
-#define SENSORS_READ_INTERVAL 2000 //Sensors read minimum interval (ms)
+#define REMOTE_START 0xFE
+#define REMOTE_END 0xFF
 
-#define SD_CHIP_SEL           4
+extern uint8_t remote_buff[32];
+extern uint8_t serial_char;
+// extern String remote_buff;
 
-#define SD_CARD_DELAY         500
-#define SD_MAX_TRIES          3
-#define SERIAL_DELAY          500
-#define SERIAL_MAX_TRIES      3
-
-//#define LOG_SD
-#define SERIAL_DEBUG
-#define REMOTE_ACTIVE
-
-const String log_file_sufix="Data.csv";
-const String config_file_name="SPUTNIK.CFG";
-
-const char* ssid = "SSID";
-const char* password = "PASS";
-
-#endif // SPUTNIKCONFIG_H_
+#endif // SPUTNIKCOMM_H_

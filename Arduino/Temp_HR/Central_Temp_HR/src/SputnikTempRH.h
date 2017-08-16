@@ -19,7 +19,6 @@
 #include <Wire.h>
 ////////////////
 #include <DHT.h>
-#include <Adafruit_SHT31.h>
 #include <Sensirion.h>    //SHT75
 
 #define DHT11_PIN            2         // Pin which is connected to the DHT sensor.
@@ -31,7 +30,6 @@
 #define SHT31_OFFSET  0
 
 extern DHT dht11, dht22;
-extern Adafruit_SHT31 sht31;
 extern Sensirion sht75;
 
 extern uint8_t dht11_error,dht22_error,sht31_error,sht75_error;
