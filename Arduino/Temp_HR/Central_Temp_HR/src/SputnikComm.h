@@ -23,6 +23,7 @@
 
 extern uint8_t remote_buff[32];
 extern uint8_t serial_char;
+extern uint8_t serial_error;
 // extern String remote_buff;
 
 #endif // SPUTNIKCOMM_H_

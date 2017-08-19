@@ -20,7 +20,8 @@
 
 #define SOFTWARE_VERSION      101
 #define INITIAL_DELAY         100
-#define SENSORS_READ_INTERVAL 2000 //Sensors read minimum interval (ms)
+#define SENSORS_READ_MIN_INTERVAL 2000     //Sensors read minimum interval (2s)
+#define SENSORS_READ_MAX_INTERVAL 1800000  //Sensors read maximum interval (30min)
 
 #define SD_CHIP_SEL           4
 
@@ -29,7 +30,7 @@
 #define SERIAL_DELAY          500
 #define SERIAL_MAX_TRIES      3
 
-//#define LOG_SD
+#define LOG_SD
 #define SERIAL_DEBUG
 #define REMOTE_ACTIVE
 

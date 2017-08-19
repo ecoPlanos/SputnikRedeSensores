@@ -17,14 +17,14 @@
 #define SPUTNIKTEMP_H_
 
 #include <Adafruit_MLX90614.h>
-// #include <SparkFunMAX31855k.h>
-// #include <SPI.h>
+#include <SparkFunMAX31855k.h>
+#include <SPI.h>
 
 #define THERMOPAR_CS SS
 #define THERMOPAR_VCC 9
 
 extern Adafruit_MLX90614 mlx;
-// extern SparkFunMAX31855k thermopar;
+extern SparkFunMAX31855k thermopar;
 
 extern uint8_t mlx_error, thermopar_error;
 

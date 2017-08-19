@@ -29,14 +29,15 @@
 #include "SputnikTemp.h"
 ////////////////////
 
+#define  ACTIVITY_LED_PIN 8
+
 uint32_t millis_start, millis_end, setup_time, acquisition_time;
 uint32_t delayMs;
-uint8_t thr_led_state;
 
 uint8_t i = 0;
 
-uint8_t sd_present, log_file_opened, config_file_opened, report_file_opened;
-String log_file_name, report_file_name;
+uint8_t sd_present, log_file_opened, config_file_opened, report_file_opened, readme_file_opened;
+String log_file_name, report_file_name, readme_file_name;
 
 void sd_card_init(void);
 void sensors_awake(void);
@@ -45,7 +46,7 @@ void sensors_sleep(void);
 Sd2Card card;
 SdVolume volume;
 SdFile root;
-File log_file, config_file, report_file;
+File log_file, config_file, report_file, readme_file;
 
 DS1302 rtc(52, 50, 48);
 Time t;
@@ -67,16 +68,15 @@ void setup() {
   Serial.println();
   #endif
 
-  pinMode(THR_LED, OUTPUT);
-  thr_led_state = 0;
+  pinMode(ACTIVITY_LED_PIN, OUTPUT);
 
   // Set the clock to run-mode, and disable the write protection
   rtc.halt(false);
   rtc.writeProtect(false);
   //Adjust RTC Date And Time
   // rtc.setDOW(MONDAY);        // Set Day-of-Week to FRIDAY
-  // rtc.setTime(15, 10, 00);     // Set the time to 12:00:00 (24hr format)
-  // rtc.setDate(17, 07, 2017);   // Set the date to August 6th, 2010
+  // rtc.setTime(19, 52, 00);     // Set the time to 12:00:00 (24hr format)
+  // rtc.setDate(18, 8, 2017);   // Set the date to August 6th, 2010
   t = rtc.getTime();
 
   report_file_name ="REPORT.LOG";
@@ -113,6 +113,33 @@ void setup() {
       report_file_opened=false;
     }
   }
+
+  readme_file_name ="README.TXT";
+  if(sd_present)
+  {
+    readme_file = SD.open(readme_file_name, FILE_WRITE);
+
+    if (readme_file) {
+      readme_file.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^");
+      readme_file.println(">>SputnikRedeSensores by ecoPlanos<<");
+      readme_file.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^");
+      readme_file.println();
+      readme_file.println("Sensors data on the SD card is saved on a file structure has follows: YYYY/MM/DD/hhmmss.CSV");
+      readme_file.println("Each sensor information is separated by \",\" respecting the folowing order:");
+      readme_file.println("DHT11 temperature (C), DHT11 RH (%), DHT22 temperature (C), DHT22 RH (%), SHT75 temperature (C), SHT75 RH (%), SHT75 dewpoint (C), NTC resistor value, PT100 resistor value, SHT31 temperature (C), SHT31 RH (%), MLX ambient temperature (C), MLX object temperature (C), Thermopar temperature (RAW) ");
+      readme_file.println();
+      readme_file.println("To configure the accquisition time, write a file called \"SPUTNIK.CFG\" at the root directory of the SD card and write a line with the time between measurements in milliseconds.");
+      readme_file.close();
+      readme_file_opened=true;
+    }
+    else
+    {
+      #ifdef SERIAL_DEBUG
+      Serial.println("Error: can't open system log file!!!");
+      #endif
+      readme_file_opened=false;
+    }
+  }
   // Read configuration from SD card
   if(sd_present)
   {
@@ -123,15 +150,32 @@ void setup() {
       #endif
       String delayMSstr = "";
       while (config_file.available()) {
-        delayMSstr+=config_file.read();
+        delayMSstr+=String(config_file.read());
       }
       #ifdef SERIAL_DEBUG
       Serial.print("Config file content string: ");
       Serial.println(delayMSstr);
       #endif
-      // delayMs = delayMSstr.toInt();
-      // Serial.println(delayMSstr);
-      //  Set delay between sensor readings based on sensor details.
+      if((((uint32_t)delayMSstr.toInt())>=((uint32_t)SENSORS_READ_MIN_INTERVAL))
+      && (((uint32_t)delayMSstr.toInt())<=((uint32_t)SENSORS_READ_MAX_INTERVAL)))
+      {
+        delayMs = delayMSstr.toInt();
+        Serial.println(delayMSstr);
+        #ifdef SERIAL_DEBUG
+        Serial.print("Valid delay found at SD card: ");
+        Serial.print(delayMs);
+        Serial.println("ms");
+        #endif
+      }
+      else
+      {
+       #ifdef SERIAL_DEBUG
+       Serial.print("Waring: Invalid delay found at SD card: ");
+       Serial.print(delayMs);
+       Serial.println("ms");
+       Serial.println(delayMSstr);
+       #endif
+      }
       config_file_opened=true;
     }
     else
@@ -142,8 +186,8 @@ void setup() {
       config_file_opened=false;
     }
   }
-  // delayMs = (SENSORS_READ_INTERVAL > delayMs) ? SENSORS_READ_INTERVAL : delayMs;
-  delayMs = (uint32_t)SENSORS_READ_INTERVAL;
+  // delayMs = (SENSORS_READ_MIN_INTERVAL > delayMs) ? SENSORS_READ_MIN_INTERVAL : delayMs;
+  delayMs = (uint32_t)SENSORS_READ_MIN_INTERVAL;
   #ifdef SERIAL_DEBUG
     Serial.print("Logging interval: ");
     Serial.println(delayMs);
@@ -204,10 +248,13 @@ void setup() {
     Serial.println("ms");
   }
   #endif
+  serial_error = 0;
 }
 
 void loop() {
   millis_start = millis();
+  digitalWrite(ACTIVITY_LED_PIN,1);
+
   #ifdef REMOTE_ACTIVE
   Serial2.write(REMOTE_START);  // Prompt remote sensors for data
   #endif
@@ -305,8 +352,8 @@ void loop() {
     Serial.print(sht75_hr);
     Serial.println("%");
     #endif
-    sd_data_string+=String(sht75_hr)+",";
     sd_data_string+=String(sht75_temp)+",";
+    sd_data_string+=String(sht75_hr)+",";
     sd_data_string+=String(sht75_dewpoint)+",";
   }
   else
@@ -334,27 +381,17 @@ void loop() {
   Serial.println("----------------TEMP----------------");
   Serial.println("------------------------------------");
   #endif
-  //
-  // thermopar.readCJT();
-  // if (!isnan(thermopar.temperature_cjt)) {
-  //   #ifdef SERIAL_DEBUG
-  //   Serial.print("Thermopar CJT temp: ");
-  //   Serial.print(thermopar.temperature_cjt);
-  //   Serial.println(" *C");
-  //   #endif
-  // }
-  // else
-  // {
-  //   sd_data_string+=",";
-  // }
 
-  pt100_temp=analogRead(PT100_PIN);
+  pt100_analog=analogRead(PT100_PIN);
   #ifdef SERIAL_DEBUG
-  Serial.print("PT100 Temp: ");
-  Serial.print(pt100_temp);
+  Serial.print("PT100 Analog: ");
+  Serial.print(pt100_analog);
   Serial.println(" Analog value");
+  Serial.print("PT100 Resistance: ");
+  Serial.print(pt100_resistance());
+  Serial.println(" Homes");
   #endif
-  sd_data_string+=String(pt100_temp)+",";
+  sd_data_string+=String(pt100_analog)+",";
 
   ntc_temp=analogRead(NTC_PIN);
   #ifdef SERIAL_DEBUG
@@ -396,46 +433,22 @@ void loop() {
 
   if(Serial2.available()>0)
   {
-    while(Serial2.available()>0)
+    if(Serial2.read()==(char)REMOTE_START)
     {
-      serial_char = Serial2.read();
-      if((char)serial_char == (char)REMOTE_START)
-      {
-        i++;
-      }
-      else if((char)serial_char != (char)REMOTE_END)
-      {
-        if(i>0)
-        {
-          sd_data_string_tmp+=String(serial_char);
-        }
-        else
-        {
-          #ifdef SERIAL_DEBUG
-          Serial.print("Warning, received wrong start! ");
-          Serial.println(String(serial_char));
-          #endif
-          Serial2.flush();
-        }
-      }
-      else
-      {
-        if(i>0)
-        {
-          #ifdef SERIAL_DEBUG
-          Serial.print("Message received from remote base: ");
-          Serial.println(sd_data_string_tmp);
-          #endif
-        }
-        else
-        {
-          #ifdef SERIAL_DEBUG
-          Serial.println("Error, received termination character out of order.");
-          #endif
-          Serial2.flush();
-          i=0;
-        }
-      }
+      sd_data_string_tmp=Serial2.readStringUntil((char)REMOTE_END);
+      #ifdef SERIAL_DEBUG
+      Serial.print("Received remote sensors data: ");
+      Serial.println(sd_data_string_tmp);
+      #endif
+      sd_data_string+=sd_data_string_tmp;
+      serial_error = 0;
+    }
+    else
+    {
+      #ifdef SERIAL_DEBUG
+      Serial.println("Error: Received wrong start character!");
+      #endif
+      serial_error = 1;
     }
   }
   else
@@ -445,7 +458,7 @@ void loop() {
       #ifdef SERIAL_DEBUG
       Serial.println("Warning: Timeout wainting for remote sensors!");
       #endif
-      sd_data_string+=",,,,";
+      sd_data_string+=",,,,,";
     }
     else
     {
@@ -456,6 +469,7 @@ void loop() {
       #endif
       i=0;
     }
+    serial_error = 1;
   }
   #endif
   #ifdef LOG_SD
@@ -473,6 +487,8 @@ void loop() {
     }
     // if the file isn't open, pop up an error:
     else {
+      digitalWrite(ACTIVITY_LED_PIN,1);
+      sd_present = false;
       #ifdef SERIAL_DEBUG
       Serial.println("error opening "+log_file_name);
       #endif
@@ -481,7 +497,7 @@ void loop() {
   #endif
   #ifdef SERIAL_DEBUG
   Serial.print("Checking sensors for errors: ");
-  Serial.println(String(dht11_error)+","+String(dht22_error)+","+String(sht31_error)+","+String(sht75_error)+","+String(mlx_error));
+  Serial.println(String(dht11_error)+","+String(dht22_error)+","+String(sht31_error)+","+String(sht75_error)+","+String(serial_error));
   #endif
   #ifdef LOG_SD
   //TODO: log sensor errors to SD card.
@@ -489,8 +505,7 @@ void loop() {
   temp_sensors_check();
   temp_hr_sensors_check();
   sensors_sleep();
-  thr_led_state = ~thr_led_state;
-  digitalWrite(THR_LED,thr_led_state);
+
   millis_end = millis();
   #ifdef SERIAL_DEBUG
   Serial.print("millis_start: ");
@@ -526,7 +541,6 @@ void loop() {
   #endif
   if(acquisition_time >= delayMs)
   {
-    // delayMs = ((uint8_t)(acquisition_time/1000))*1000+1000;
     delayMs = acquisition_time;
     #ifdef SERIAL_DEBUG
     Serial.print("Warning: Acquisition time forced to ");

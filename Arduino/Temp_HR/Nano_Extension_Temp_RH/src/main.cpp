@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ////////////////////
+#include <SPI.h>
 #include "../../../SputnikConfig.h"
 #include "SputnikComm.h"
 #include "SputnikTempRH.h"
@@ -29,14 +30,18 @@ void sensors_sleep(void);
 
 void setup() {
   millis_start = millis();
+  Serial.begin(115200);
+
   Wire.begin();
   //disable pullup resistors TODO: disable i2c internal pullups to work with MLX and SHT31
-  //digitalWrite(SDA, 0);
-  //digitalWrite(SCL, 0);
+  digitalWrite(SDA, 0);
+  digitalWrite(SCL, 0);
   // digitalWrite(SDA, 1);
   // digitalWrite(SCL, 1);
 
-  Serial.begin(115200);
+  SPI.begin();
+  // SPISettings(250000, MSBFIRST, SPI_MODE0);
+
   #ifdef SERIAL_DEBUG
   Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
   Serial.println(".i.SputnikRedeSensores by ecoPlanos.i.");
@@ -45,7 +50,8 @@ void setup() {
   #endif
 
   pinMode(LED_BUILTIN, OUTPUT);
-  act_led_state = 0;
+  act_led_state = 1;
+  digitalWrite(LED_BUILTIN, act_led_state);
 
   delay(SERIAL_DELAY);
   // Initialize temperature and RH sensors.
@@ -104,38 +110,38 @@ void loop() {
       Serial.println("------------------------------------");
       #endif
 
-      // float sht31_temp = sht31.readTemperature()-SHT31_OFFSET;
-      // float sht31_hr = sht31.readHumidity();
-      //
-      // if (! isnan(sht31_temp)) {  // check if 'is not a number'
-      //   #ifdef SERIAL_DEBUG
-      //   Serial.print("SHT31 Temp: ");
-      //   Serial.print(sht31_temp);
-      //   Serial.println(" *C");
-      //   #endif
-      //   serial_data_string+=String(sht31_temp)+",";
-      // } else {
-      //   sht31_error=1;
-      //   #ifdef SERIAL_DEBUG
-      //   Serial.println("Error reading SHT31 temperature!");
-      //   #endif
-      //   serial_data_string+=",";
-      // }
-      //
-      // if (! isnan(sht31_hr)) {  // check if 'is not a number'
-      //   #ifdef SERIAL_DEBUG
-      //   Serial.print("SHT31 RH: ");
-      //   Serial.print(sht31_hr);
-      //   Serial.println("%");
-      //   #endif
-      //   serial_data_string+=String(sht31_hr)+",";
-      // } else {
-      //   sht31_error = 1;
-      //   #ifdef SERIAL_DEBUG
-      //   Serial.println("Error reading SHT31 humidity!");
-      //   #endif
-      //   serial_data_string+=",";
-      // }
+      float sht31_temp = sht31.readTemperature()-SHT31_OFFSET;
+      float sht31_hr = sht31.readHumidity();
+
+      if (! isnan(sht31_temp)) {  // check if 'is not a number'
+        #ifdef SERIAL_DEBUG
+        Serial.print("SHT31 Temp: ");
+        Serial.print(sht31_temp);
+        Serial.println(" *C");
+        #endif
+        serial_data_string+=String(sht31_temp)+",";
+      } else {
+        sht31_error=1;
+        #ifdef SERIAL_DEBUG
+        Serial.println("Error reading SHT31 temperature!");
+        #endif
+        serial_data_string+=",";
+      }
+
+      if (! isnan(sht31_hr)) {  // check if 'is not a number'
+        #ifdef SERIAL_DEBUG
+        Serial.print("SHT31 RH: ");
+        Serial.print(sht31_hr);
+        Serial.println("%");
+        #endif
+        serial_data_string+=String(sht31_hr)+",";
+      } else {
+        sht31_error = 1;
+        #ifdef SERIAL_DEBUG
+        Serial.println("Error reading SHT31 humidity!");
+        #endif
+        serial_data_string+=",";
+      }
 
       #ifdef SERIAL_DEBUG
       Serial.println("------------------------------------");
@@ -164,20 +170,20 @@ void loop() {
         serial_data_string+=",,";
       }
 
-      // thermopar.readTempC();
-      // if (!isnan(thermopar.temperature_c)) {
-      //   #ifdef SERIAL_DEBUG
-      //   Serial.print("Thermopar temp: ");
-      //   Serial.print(thermopar.temperature_c);
-      //   Serial.println(" *C");
-      //   #endif
-      //   // sd_data_string+=String(thermopar.temperature_cjt)+","+String(thermopar.temperature_raw)+",";
-      //   serial_data_string+=String(thermopar.temperature_raw)+",";
-      // }
-      // else
-      // {
-      //   serial_data_string+=",";
-      // }
+      thermopar.readTempC();
+      if (!isnan(thermopar.temperature_c)) {
+        #ifdef SERIAL_DEBUG
+        Serial.print("Thermopar temp: ");
+        Serial.print(thermopar.temperature_c);
+        Serial.println(" *C");
+        #endif
+        // sd_data_string+=String(thermopar.temperature_cjt)+","+String(thermopar.temperature_raw)+",";
+        serial_data_string+=String(thermopar.temperature_raw);
+      }
+      else
+      {
+        serial_data_string+=",";
+      }
 
       Serial.write(REMOTE_START);
       Serial.print(serial_data_string);
@@ -188,14 +194,11 @@ void loop() {
       Serial.print("Cheking sensors for errors: ");
       Serial.println(String(sht31_error)+","+String(mlx_error));
       #endif
-      // Serial.write('\n');
-      //   }
-      //   Serial.flush(); //Clean any unprocessed requests
+
       temp_sensors_check();
       temp_hr_sensors_check();
       sensors_sleep();
-      // act_led_state = ~act_led_state;
-      // digitalWrite(LED_BUILTIN,act_led_state);
+
       millis_end = millis();
       #ifdef SERIAL_DEBUG
       Serial.print("millis_start: ");
