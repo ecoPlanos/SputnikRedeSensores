@@ -53,6 +53,7 @@ Time t;
 
 void setup() {
   millis_start = millis();
+  // analogReadResolution(12);
   Wire.begin();
   Wire1.begin();
   SPI.begin();
@@ -60,6 +61,8 @@ void setup() {
   Serial1.begin(115200);  // Start ESP wifi communication interface
   #ifdef REMOTE_ACTIVE
   Serial2.begin(115200);  // Start communication interface with remote sensors
+  delay(100);
+  Serial2.write(REMOTE_START);  // Prompt remote sensors for data
   #endif
   #ifdef SERIAL_DEBUG
   Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
@@ -96,10 +99,6 @@ void setup() {
     report_file = SD.open(report_file_name, FILE_WRITE);
 
     if (report_file) {
-      report_file.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^");
-      report_file.println(">>SputnikRedeSensores by ecoPlanos<<");
-      report_file.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^");
-      report_file.println();
       report_file.println(String(t.year)+"/"+String(t.mon)+"/"+String(t.date)+"/"+String(t.hour)+"H"+String(t.min)+"M"+String(t.sec));
       report_file.println("Starting new acquisition");
       report_file.close();
@@ -117,41 +116,41 @@ void setup() {
   readme_file_name ="README.TXT";
   if(sd_present)
   {
-    readme_file = SD.open(readme_file_name, FILE_WRITE);
-
-    if (readme_file) {
-      readme_file.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^");
-      readme_file.println(">>SputnikRedeSensores by ecoPlanos<<");
-      readme_file.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^");
-      readme_file.println();
-      readme_file.println("Sensors data on the SD card is saved on a file structure has follows: YYYY/MM/DD/hhmmss.CSV");
-      readme_file.println("Each sensor information is separated by \",\" respecting the folowing order:");
-      readme_file.println("DHT11 temperature (C), DHT11 RH (%), DHT22 temperature (C), DHT22 RH (%), SHT75 temperature (C), SHT75 RH (%), SHT75 dewpoint (C), NTC resistor value, PT100 resistor value, SHT31 temperature (C), SHT31 RH (%), MLX ambient temperature (C), MLX object temperature (C), Thermopar temperature (RAW) ");
-      readme_file.println();
-      readme_file.println("To configure the accquisition time, write a file called \"SPUTNIK.CFG\" at the root directory of the SD card and write a line with the time between measurements in milliseconds.");
-      readme_file.close();
-      readme_file_opened=true;
-    }
-    else
-    {
-      #ifdef SERIAL_DEBUG
-      Serial.println("Error: can't open system log file!!!");
-      #endif
-      readme_file_opened=false;
+    readme_file = SD.open(readme_file_name, FILE_READ);
+    if (!readme_file) {
+      readme_file = SD.open(readme_file_name, FILE_WRITE);
+      if (readme_file) {
+        readme_file.println("Sensors data on the SD card is saved on a file structure as follows: YYYY/MM/DD/hhmmss.CSV");
+        readme_file.println("Each sensor information is separated by \",\" respecting the folowing order:");
+        readme_file.println("time stamp (ms from program start), DHT11 temperature (C), DHT11 RH (%), DHT22 temperature (C), DHT22 RH (%), SHT75 temperature (C), SHT75 RH (%), SHT75 dewpoint (C), PT100 resistor value, NTC resistor value, SHT31 temperature (C), SHT31 RH (%), MLX ambient temperature (C), MLX object temperature (C), Thermopar temperature (RAW) ");
+        readme_file.println();
+        readme_file.println("To configure the accquisition time, write a file called \"SPUTNIK.CFG\" at the root directory of the SD card and write a line with the time between measurements in milliseconds.");
+        readme_file.close();
+        readme_file_opened=true;
+      }
+      else
+      {
+        #ifdef SERIAL_DEBUG
+        Serial.println("Error: can't open system log file!!!");
+        #endif
+        readme_file_opened=false;
+      }
     }
   }
   // Read configuration from SD card
   if(sd_present)
   {
     config_file = SD.open(config_file_name, FILE_READ);
-    if (config_file) {
+    if (config_file)
+    {
       #ifdef SERIAL_DEBUG
       Serial.println("Config file successfuly open");
       #endif
       String delayMSstr = "";
-      while (config_file.available()) {
-        delayMSstr+=String(config_file.read());
-      }
+      // while (config_file.available()) {
+      //   delayMSstr+=String(config_file.read());
+      // }
+      delayMSstr=config_file.readString();
       #ifdef SERIAL_DEBUG
       Serial.print("Config file content string: ");
       Serial.println(delayMSstr);
@@ -180,14 +179,24 @@ void setup() {
     }
     else
     {
+      config_file = SD.open(config_file_name, FILE_WRITE);
+      if (config_file)
+      {
+        config_file.print((uint16_t)SENSORS_READ_MIN_INTERVAL);
+        config_file.close();
+      }
+      else
+      {
+        #ifdef SERIAL_DEBUG
+        Serial.println("Error creating config file!");
+        #endif
+      }
       #ifdef SERIAL_DEBUG
       Serial.println("Error: can't open configuration file!!!");
       #endif
       config_file_opened=false;
     }
   }
-  // delayMs = (SENSORS_READ_MIN_INTERVAL > delayMs) ? SENSORS_READ_MIN_INTERVAL : delayMs;
-  delayMs = (uint32_t)SENSORS_READ_MIN_INTERVAL;
   #ifdef SERIAL_DEBUG
     Serial.print("Logging interval: ");
     Serial.println(delayMs);
@@ -389,17 +398,20 @@ void loop() {
   Serial.println(" Analog value");
   Serial.print("PT100 Resistance: ");
   Serial.print(pt100_resistance());
-  Serial.println(" Homes");
+  Serial.println(" Ohm");
   #endif
-  sd_data_string+=String(pt100_analog)+",";
+  sd_data_string+=String(pt100_resistance())+",";
 
-  ntc_temp=analogRead(NTC_PIN);
+  ntc_analog=analogRead(NTC_PIN);
   #ifdef SERIAL_DEBUG
-  Serial.print("NTC Temp: ");
-  Serial.print(ntc_temp);
+  Serial.print("NTC Analog: ");
+  Serial.print(ntc_analog);
   Serial.println(" Analog value");
+  Serial.print("NTC Resistance: ");
+  Serial.print(ntc_resistance());
+  Serial.println(" Ohm");
   #endif
-  sd_data_string+=String(ntc_temp)+",";
+  sd_data_string+=String(ntc_resistance())+",";
   #ifdef REMOTE_ACTIVE
   #ifdef SERIAL_DEBUG
   Serial.println("------------------------------------");
@@ -484,6 +496,7 @@ void loop() {
       #ifdef SERIAL_DEBUG
       Serial.println("Logged data: "+sd_data_string);
       #endif
+      digitalWrite(ACTIVITY_LED_PIN,0);
     }
     // if the file isn't open, pop up an error:
     else {

@@ -1,6 +1,6 @@
 #include "SputnikTemp.h"
 
-uint16_t ntc_temp, pt100_analog;
+uint16_t ntc_analog, pt100_analog;
 uint8_t ntc_error, mlx_error;
 
 void temp_init(void)
@@ -20,4 +20,8 @@ float pt100_resistance(void)
 float pt100_temperature(void)
 {
   return 0.00;  //TODO: implement lookup table
+}
+float ntc_resistance(void)
+{
+  return ((float)VCC_TRUE*(float)NTC_SERIAL_RESISTOR)/((float)ntc_analog*VCC/pow(2,10))-(float)NTC_SERIAL_RESISTOR;
 }

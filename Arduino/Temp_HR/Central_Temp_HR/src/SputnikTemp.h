@@ -18,17 +18,20 @@
 
 #include <Arduino.h>
 
-#define NTC_PIN 7
-#define PT100_PIN 8
+#define NTC_PIN A1
+#define PT100_PIN A8
 #define PT100_ANALOG_VALUE_1124 420  //Measured for a 112.4 homs resistor (1.38V)
 #define PT100_ANALOG_VALUE_0    76   //Measured for 0ºC
 #define PT100_RESISTANCE_0    100
+#define NTC_SERIAL_RESISTOR 9980
 
+const float VCC_TRUE = 3.28;
+const float VCC = 3.3;
 const float PT100_RESISTANCE_1124 = 112.4;
 const float PT100_M = 27.742;
 const float PT100_B = -2698.2;
 
-extern uint16_t ntc_temp, pt100_analog;
+extern uint16_t ntc_analog, pt100_analog;
 
 extern uint8_t ntc_error, mlx_error;
 
@@ -36,5 +39,6 @@ void temp_init(void);
 void temp_sensors_check(void);
 float pt100_resistance(void);
 float pt100_temperature(void);
+float ntc_resistance(void);
 
 #endif // SPUTNIKTEMP_H_
