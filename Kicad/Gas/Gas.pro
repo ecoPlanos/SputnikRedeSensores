@@ -1,4 +1,4 @@
-update=Ter 08 Ago 2017 17:18:35 WEST
+update=Tue 22 Aug 2017 04:38:39 PM WEST
 version=1
 last_client=kicad
 [pcbnew]
@@ -30,7 +30,7 @@ version=1
 LibDir=
 [eeschema/libraries]
 LibName1=Gas-rescue
-LibName2=/home/gasoile2/Private/Personal/Projects/ecoPlanos/dev/SputnikRedeSensores/Kicad/libs/freetronics_kicad_library-master/freetronics_schematic
+LibName2=../libs/freetronics_kicad_library-master/freetronics_schematic
 LibName3=power
 LibName4=device
 LibName5=transistors
