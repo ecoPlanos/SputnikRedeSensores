@@ -1,0 +1,107 @@
+Cmp-Mod V01 Created by PcbNew   date = Qua 23 Ago 2017 18:52:23 WEST
+
+BeginCmp
+TimeStamp = 596B8802
+Path = /59667921
+Reference = C1;
+ValeurCmp = CP;
+IdModule  = Capacitors_THT:CP_Radial_D5.0mm_P2.50mm;
+EndCmp
+
+BeginCmp
+TimeStamp = 596B8808
+Path = /5966781A
+Reference = C2;
+ValeurCmp = CP;
+IdModule  = Capacitors_THT:CP_Radial_D5.0mm_P2.50mm;
+EndCmp
+
+BeginCmp
+TimeStamp = 596B880E
+Path = /59667ADE
+Reference = D1;
+ValeurCmp = LED;
+IdModule  = LEDs:LED_D4.0mm;
+EndCmp
+
+BeginCmp
+TimeStamp = 596B8839
+Path = /596664AC
+Reference = R1;
+ValeurCmp = 6K8;
+IdModule  = Resistors_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal;
+EndCmp
+
+BeginCmp
+TimeStamp = 596B883F
+Path = /59666507
+Reference = R2;
+ValeurCmp = 13K2;
+IdModule  = Resistors_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal;
+EndCmp
+
+BeginCmp
+TimeStamp = 596B8845
+Path = /59667D01
+Reference = R3;
+ValeurCmp = R;
+IdModule  = Resistors_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E0B4C
+Path = /596669B3
+Reference = J1;
+ValeurCmp = MG811;
+IdModule  = Pin_Headers:Pin_Header_Straight_1x03_Pitch1.00mm;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E0B52
+Path = /599D501A
+Reference = J2;
+ValeurCmp = Digital;
+IdModule  = ecoPlanos_custom:JST_PHR-4;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E0B61
+Path = /59666EBF
+Reference = J3;
+ValeurCmp = MQ135;
+IdModule  = Pin_Headers:Pin_Header_Straight_1x04_Pitch2.54mm;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E0B77
+Path = /599D4A0D
+Reference = J5;
+ValeurCmp = Analog;
+IdModule  = ecoPlanos_custom:JST_PHR-4;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E0CAB
+Path = /596B4688
+Reference = J4;
+ValeurCmp = CCS811;
+IdModule  = Pin_Headers:Pin_Header_Straight_1x07_Pitch2.54mm;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E0B7D
+Path = /599D8F77
+Reference = J6;
+ValeurCmp = CONN_01X02;
+IdModule  = Connectors_Molex:Molex_KK-6410-02_02x2.54mm_Straight;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E0B83
+Path = /599D9054
+Reference = J7;
+ValeurCmp = CONN_01X02;
+IdModule  = Connectors_Molex:Molex_KK-6410-02_02x2.54mm_Straight;
+EndCmp
+
+EndListe
