@@ -1,4 +1,4 @@
-update=Tue 22 Aug 2017 04:38:39 PM WEST
+update=Qua 23 Ago 2017 13:35:03 WEST
 version=1
 last_client=kicad
 [pcbnew]
@@ -27,10 +27,10 @@ NetIExt=net
 version=1
 [eeschema]
 version=1
-LibDir=
+LibDir=../libs/Common-Parts-Library-KiCad;../libs/freetronics_kicad_library-master;../libs/ecoPlanos
 [eeschema/libraries]
-LibName1=Gas-rescue
-LibName2=../libs/freetronics_kicad_library-master/freetronics_schematic
+LibName1=ecoPlanos_custom
+LibName2=Gas-rescue
 LibName3=power
 LibName4=device
 LibName5=transistors
@@ -60,3 +60,5 @@ LibName28=opto
 LibName29=atmel
 LibName30=contrib
 LibName31=valves
+LibName32=Common-Parts-Library
+LibName33=freetronics_schematic
