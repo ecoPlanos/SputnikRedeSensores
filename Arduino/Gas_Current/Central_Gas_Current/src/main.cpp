@@ -57,6 +57,7 @@ void setup() {
   sys_time = millis();
   sys_time_last = sys_time;
 
+  analogReadResolution(12);
   pinMode(THR_LED, OUTPUT);
 
   // Set the clock to run-mode, and disable the write protection
@@ -211,7 +212,17 @@ void loop() {
     #endif
     sd_data_string+=",,";
   }
-
+  #ifdef LOG_SERIAL
+  Serial.println("------------------------------------");
+  Serial.println("----------------GAS-----------------");
+  Serial.println("------------------------------------");
+  #endif
+  sct013_analog=analogRead(SCT013_PIN);
+  #ifdef LOG_SERIAL
+  Serial.print("SCT013-000 Analogic: ");
+  Serial.println(sct013_analog);
+  #endif
+  sd_data_string+=String(sct013_analog)+",";
   // Log to SD card
   if(sd_present)
   {

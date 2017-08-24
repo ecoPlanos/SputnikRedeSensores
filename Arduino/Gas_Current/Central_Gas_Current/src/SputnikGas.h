@@ -19,8 +19,8 @@
 #include <Arduino.h>
 #include <SparkFunCCS811.h>
 
-#define MG811_PIN 0
-#define MQ135_PIN 1
+#define MG811_PIN A0
+#define MQ135_PIN A1
 #define CCS811_NWAK 47
 #define CCS811_NINT 48
 #define CCS811_NRST 49

@@ -1,4 +1,4 @@
-update=Qua 23 Ago 2017 13:35:03 WEST
+update=Qui 24 Ago 2017 10:08:24 WEST
 version=1
 last_client=kicad
 [pcbnew]
@@ -27,7 +27,7 @@ NetIExt=net
 version=1
 [eeschema]
 version=1
-LibDir=../libs/Common-Parts-Library-KiCad;../libs/freetronics_kicad_library-master;../libs/ecoPlanos
+LibDir=../../libs/Common-Parts-Library-KiCad;../../libs/ecoPlanos;../../libs/freetronics_kicad_library-master;../../libs/ArduProMini
 [eeschema/libraries]
 LibName1=ecoPlanos_custom
 LibName2=Gas-rescue

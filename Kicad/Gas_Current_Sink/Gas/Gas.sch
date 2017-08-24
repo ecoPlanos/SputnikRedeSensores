@@ -86,7 +86,7 @@ U 1 1 596664AC
 P 4750 2050
 F 0 "R1" V 4830 2050 50  0000 C CNN
 F 1 "6K8" V 4750 2050 50  0000 C CNN
-F 2 "Resistors_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal" V 4680 2050 50  0001 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 4680 2050 50  0001 C CNN
 F 3 "" H 4750 2050 50  0001 C CNN
 	1    4750 2050
 	1    0    0    -1  
@@ -97,20 +97,20 @@ U 1 1 59666507
 P 4750 2550
 F 0 "R2" V 4830 2550 50  0000 C CNN
 F 1 "13K2" V 4750 2550 50  0000 C CNN
-F 2 "Resistors_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal" V 4680 2550 50  0001 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 4680 2550 50  0001 C CNN
 F 3 "" H 4750 2550 50  0001 C CNN
 	1    4750 2550
 	1    0    0    -1  
 $EndComp
 Text GLabel 5150 2300 2    60   Input ~ 0
-Vout
+MQ135_out_3V3
 $Comp
 L CONN_01X04 J1
 U 1 1 596669B3
 P 1600 1850
 F 0 "J1" H 1600 2150 50  0000 C TNN
 F 1 "MG811" V 1650 1850 50  0000 C TNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x03_Pitch1.00mm" H 1600 1425 50  0001 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x03_Pitch2.54mm" H 1600 1425 50  0001 C CNN
 F 3 "" H 1575 2050 50  0001 C CNN
 	1    1600 1850
 	0    1    1    0   
@@ -167,7 +167,7 @@ U 1 1 59667D01
 P 4600 1100
 F 0 "R3" V 4680 1100 50  0000 C CNN
 F 1 "R" V 4600 1100 50  0000 C CNN
-F 2 "Resistors_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal" V 4530 1100 50  0001 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 4530 1100 50  0001 C CNN
 F 3 "" H 4600 1100 50  0001 C CNN
 	1    4600 1100
 	0    1    1    0   
@@ -215,6 +215,50 @@ F 3 "" H 2850 1800 50  0001 C CNN
 	1    2850 1800
 	0    -1   -1   0   
 $EndComp
+$Comp
+L CONN_01X02 J6
+U 1 1 599D8F77
+P 6050 850
+F 0 "J6" H 6050 1000 50  0000 C CNN
+F 1 "CONN_01X02" V 6150 850 50  0000 C CNN
+F 2 "Connectors_Molex:Molex_KK-6410-02_02x2.54mm_Straight" H 6050 850 50  0001 C CNN
+F 3 "" H 6050 850 50  0001 C CNN
+	1    6050 850 
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_01X02 J7
+U 1 1 599D9054
+P 6050 1350
+F 0 "J7" H 6050 1500 50  0000 C CNN
+F 1 "CONN_01X02" V 6150 1350 50  0000 C CNN
+F 2 "Connectors_Molex:Molex_KK-6410-02_02x2.54mm_Straight" H 6050 1350 50  0001 C CNN
+F 3 "" H 6050 1350 50  0001 C CNN
+	1    6050 1350
+	1    0    0    -1  
+$EndComp
+$Comp
+L LED-RESCUE-Gas D2
+U 1 1 599EF3B9
+P 3300 2950
+F 0 "D2" H 3300 3050 50  0000 C CNN
+F 1 "LED" H 3300 2850 50  0000 C CNN
+F 2 "LEDs:LED_D4.0mm" H 3300 2950 50  0001 C CNN
+F 3 "" H 3300 2950 50  0001 C CNN
+	1    3300 2950
+	0    -1   -1   0   
+$EndComp
+$Comp
+L R-RESCUE-Gas R4
+U 1 1 599EF44A
+P 3300 2400
+F 0 "R4" V 3380 2400 50  0000 C CNN
+F 1 "R" V 3300 2400 50  0000 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 3230 2400 50  0001 C CNN
+F 3 "" H 3300 2400 50  0001 C CNN
+	1    3300 2400
+	-1   0    0    1   
+$EndComp
 Wire Wire Line
 	4750 2200 4750 2400
 Wire Wire Line
@@ -223,7 +267,7 @@ Wire Wire Line
 	3750 750  3750 2900
 Connection ~ 4750 2300
 Wire Wire Line
-	1750 2500 3300 2500
+	1750 2500 2800 2500
 Wire Wire Line
 	4750 1500 4750 1900
 Wire Wire Line
@@ -235,7 +279,7 @@ Wire Wire Line
 Wire Wire Line
 	2350 1650 2350 3350
 Wire Wire Line
-	3500 2300 5150 2300
+	3600 2300 5150 2300
 Wire Wire Line
 	5750 1600 4550 1600
 Wire Wire Line
@@ -262,21 +306,21 @@ Wire Wire Line
 Wire Wire Line
 	1850 2800 1850 2600
 Wire Wire Line
-	1850 2600 3400 2600
+	1850 2600 2700 2600
 Wire Wire Line
 	1750 2800 1750 2500
 Connection ~ 4250 1600
 Wire Wire Line
 	1650 2800 1650 2400
 Wire Wire Line
-	1650 2400 3000 2400
+	1650 2400 2900 2400
 Connection ~ 2350 2800
 Wire Wire Line
-	1550 2300 2900 2300
+	1550 2300 3000 2300
 Wire Wire Line
 	1550 2300 1550 2800
 Wire Wire Line
-	1450 2200 2800 2200
+	1450 2200 3400 2200
 Wire Wire Line
 	1450 2200 1450 2800
 Connection ~ 4750 3350
@@ -284,17 +328,11 @@ Connection ~ 3750 1100
 Wire Wire Line
 	4250 750  4250 1600
 Wire Wire Line
-	3500 2300 3500 2100
+	3600 2300 3600 2100
 Wire Wire Line
-	3400 2600 3400 2100
+	2900 2400 2900 2100
 Wire Wire Line
-	3300 2500 3300 2100
-Wire Wire Line
-	3000 2400 3000 2100
-Wire Wire Line
-	2900 2300 2900 2100
-Wire Wire Line
-	2800 2200 2800 2100
+	3000 2300 3000 2100
 Wire Wire Line
 	4050 3200 4050 3450
 Connection ~ 4050 3350
@@ -307,31 +345,9 @@ Wire Wire Line
 	3750 3200 3750 3350
 Connection ~ 3750 3350
 Wire Wire Line
-	1550 1500 3600 1500
+	1550 1500 3500 1500
 Wire Wire Line
-	3600 1500 3600 2100
-$Comp
-L CONN_01X02 J6
-U 1 1 599D8F77
-P 6050 850
-F 0 "J6" H 6050 1000 50  0000 C CNN
-F 1 "CONN_01X02" V 6150 850 50  0000 C CNN
-F 2 "Socket_Strips:Socket_Strip_Angled_1x02_Pitch2.54mm" H 6050 850 50  0001 C CNN
-F 3 "" H 6050 850 50  0001 C CNN
-	1    6050 850 
-	1    0    0    -1  
-$EndComp
-$Comp
-L CONN_01X02 J7
-U 1 1 599D9054
-P 6050 1350
-F 0 "J7" H 6050 1500 50  0000 C CNN
-F 1 "CONN_01X02" V 6150 1350 50  0000 C CNN
-F 2 "Socket_Strips:Socket_Strip_Angled_1x02_Pitch2.54mm" H 6050 1350 50  0001 C CNN
-F 3 "" H 6050 1350 50  0001 C CNN
-	1    6050 1350
-	1    0    0    -1  
-$EndComp
+	3500 1500 3500 2100
 Wire Wire Line
 	5850 800  3750 800 
 Connection ~ 3750 800 
@@ -345,6 +361,21 @@ Wire Wire Line
 Wire Wire Line
 	5750 1400 5850 1400
 Connection ~ 5750 1400
-NoConn ~ 2700 2100
-NoConn ~ 3000 1950
+Wire Wire Line
+	2700 2600 2700 2100
+Wire Wire Line
+	2800 2500 2800 2100
+Wire Wire Line
+	3400 2200 3400 2100
+Wire Wire Line
+	3300 2800 3300 2550
+Wire Wire Line
+	3300 2250 3300 2100
+Wire Wire Line
+	3300 3100 3300 3350
+Connection ~ 3300 3350
+Text Label 1950 1500 0    60   ~ 0
+MG811_out
+Text Label 4450 1500 0    60   ~ 0
+MQ135_out_5v
 $EndSCHEMATC

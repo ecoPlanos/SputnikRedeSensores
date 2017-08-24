@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by PcbNew   date = Qua 23 Ago 2017 18:52:23 WEST
+Cmp-Mod V01 Created by PcbNew   date = Qui 24 Ago 2017 17:24:42 WEST
 
 BeginCmp
 TimeStamp = 596B8802
@@ -22,30 +22,6 @@ Path = /59667ADE
 Reference = D1;
 ValeurCmp = LED;
 IdModule  = LEDs:LED_D4.0mm;
-EndCmp
-
-BeginCmp
-TimeStamp = 596B8839
-Path = /596664AC
-Reference = R1;
-ValeurCmp = 6K8;
-IdModule  = Resistors_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal;
-EndCmp
-
-BeginCmp
-TimeStamp = 596B883F
-Path = /59666507
-Reference = R2;
-ValeurCmp = 13K2;
-IdModule  = Resistors_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal;
-EndCmp
-
-BeginCmp
-TimeStamp = 596B8845
-Path = /59667D01
-Reference = R3;
-ValeurCmp = R;
-IdModule  = Resistors_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal;
 EndCmp
 
 BeginCmp
@@ -102,6 +78,182 @@ Path = /599D9054
 Reference = J7;
 ValeurCmp = CONN_01X02;
 IdModule  = Connectors_Molex:Molex_KK-6410-02_02x2.54mm_Straight;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E0F0D
+Path = 
+Reference = REF**;
+ValeurCmp = 1pin;
+IdModule  = Connectors:1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E0F23
+Path = 
+Reference = REF**;
+ValeurCmp = 1pin;
+IdModule  = Connectors:1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E0F24
+Path = 
+Reference = REF**;
+ValeurCmp = 1pin;
+IdModule  = Connectors:1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E0F25
+Path = 
+Reference = REF**;
+ValeurCmp = 1pin;
+IdModule  = Connectors:1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E23C4
+Path = 
+Reference = REF**;
+ValeurCmp = 1pin;
+IdModule  = Connectors:1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E23CC
+Path = 
+Reference = REF**;
+ValeurCmp = 1pin;
+IdModule  = Connectors:1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E23D4
+Path = 
+Reference = REF**;
+ValeurCmp = 1pin;
+IdModule  = Connectors:1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E23DC
+Path = 
+Reference = REF**;
+ValeurCmp = 1pin;
+IdModule  = Connectors:1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E23E4
+Path = 
+Reference = REF**;
+ValeurCmp = 1pin;
+IdModule  = Connectors:1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E23EC
+Path = 
+Reference = REF**;
+ValeurCmp = 1pin;
+IdModule  = Connectors:1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E23F4
+Path = 
+Reference = REF**;
+ValeurCmp = 1pin;
+IdModule  = Connectors:1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E23FC
+Path = 
+Reference = REF**;
+ValeurCmp = 1pin;
+IdModule  = Connectors:1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E2404
+Path = 
+Reference = REF**;
+ValeurCmp = 1pin;
+IdModule  = Connectors:1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E240C
+Path = 
+Reference = REF**;
+ValeurCmp = 1pin;
+IdModule  = Connectors:1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E2414
+Path = 
+Reference = REF**;
+ValeurCmp = 1pin;
+IdModule  = Connectors:1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = 599E43B0
+Path = 
+Reference = SHIELD401;
+ValeurCmp = ARDUINO_DUE_SHIELD;
+IdModule  = ecoPlanos_custom:ARDUINO_DUE_SHIELD_LAYOUT;
+EndCmp
+
+BeginCmp
+TimeStamp = 599F0BCE
+Path = /599EF3B9
+Reference = D2;
+ValeurCmp = LED;
+IdModule  = LEDs:LED_D4.0mm;
+EndCmp
+
+BeginCmp
+TimeStamp = 599F0ED7
+Path = /596664AC
+Reference = R1;
+ValeurCmp = 6K8;
+IdModule  = Resistors_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal;
+EndCmp
+
+BeginCmp
+TimeStamp = 599F0EEC
+Path = /59666507
+Reference = R2;
+ValeurCmp = 13K2;
+IdModule  = Resistors_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal;
+EndCmp
+
+BeginCmp
+TimeStamp = 599F0F01
+Path = /59667D01
+Reference = R3;
+ValeurCmp = R;
+IdModule  = Resistors_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal;
+EndCmp
+
+BeginCmp
+TimeStamp = 599F0F16
+Path = /599EF44A
+Reference = R4;
+ValeurCmp = R;
+IdModule  = Resistors_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal;
+EndCmp
+
+BeginCmp
+TimeStamp = 599F2F1A
+Path = 
+Reference = G***;
+ValeurCmp = LOGO;
+IdModule  = ecoPlanos_custom:ecoplanos_logo_20mm;
 EndCmp
 
 EndListe
