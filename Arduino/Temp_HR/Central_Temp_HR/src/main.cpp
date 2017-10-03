@@ -130,9 +130,9 @@ void setup() {
     if (!readme_file) {
       readme_file = SD.open(readme_file_name, FILE_WRITE);
       if (readme_file) {
-        readme_file.println("Sensors data on the SD card is saved on a file structure as follows: YYYY/MM/DD/hhmmss.CSV");
+        readme_file.println("Sensors data on the SD card is saved in a file structure as follows: YYYY/MM/DD/hhmmss.CSV");
         readme_file.println("Each sensor information is separated by \",\" respecting the folowing order:");
-        readme_file.println("time stamp (ms from program start), DHT11 temperature (C), DHT11 RH (%), DHT22 temperature (C), DHT22 RH (%), SHT75 temperature (C), SHT75 RH (%), SHT75 dewpoint (C), PT100 resistor value, NTC resistor value, SHT31 temperature (C), SHT31 RH (%), MLX ambient temperature (C), MLX object temperature (C), Thermopar temperature (RAW) ");
+        readme_file.println("year,month,day,time,DHT11 temp (C),DHT11 RH (%),DHT22 temp (C),DHT22 RH (%),SHT75 temp (C),SHT75 RH (%),SHT75 dewp (C),PT100 (Ohm),NTC (Ohm),SHT31 temp (C),SHT31 RH (%),MLX ambient temp (C),MLX object temp (C),Thermopar temp (RAW) ");
         readme_file.println();
         readme_file.println("To configure the accquisition time, write a file called \"SPUTNIK.CFG\" at the root directory of the SD card and write a line with the time between measurements in milliseconds.");
         readme_file.close();
@@ -188,11 +188,12 @@ void setup() {
       }
       else
       {
+       delayMsRequested = (uint32_t)SENSORS_READ_MIN_INTERVAL;
+       delayMs = delayMsRequested;
        #ifdef SERIAL_DEBUG
        Serial.print("Waring: Invalid delay found at SD card: ");
-       Serial.print(delayMs);
+       Serial.print(delayMSstr);
        Serial.println("ms");
-       Serial.println(delayMSstr);
        #endif
       }
       config_file_opened=true;
@@ -575,7 +576,6 @@ void loop() {
   if(acquisition_time >= delayMs)
   {
     delayMs = acquisition_time;
-    delayMsRequested = delayMs;
     #ifdef SERIAL_DEBUG
     Serial.print("Warning: Acquisition time forced to ");
     Serial.print(delayMs);
@@ -601,7 +601,6 @@ void loop() {
       if(acquisition_time > delayMsRequested)
       {
           delayMs = acquisition_time;
-          delayMsRequested = delayMs;
       }
       else
       {
