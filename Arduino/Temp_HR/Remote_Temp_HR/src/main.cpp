@@ -15,7 +15,7 @@
 
 ////////////////////
 #include <SPI.h>
-#include "../../../SputnikConfig.h"
+#include "SputnikConfig.h"
 #include "SputnikComm.h"
 #include "SputnikTempRH.h"
 #include "SputnikTemp.h"
@@ -33,14 +33,11 @@ void setup() {
   Serial.begin(115200);
 
   Wire.begin();
-  //disable pullup resistors TODO: disable i2c internal pullups to work with MLX and SHT31
+  //disable i2c internal pullups to work with MLX and SHT31
   digitalWrite(SDA, 0);
   digitalWrite(SCL, 0);
-  // digitalWrite(SDA, 1);
-  // digitalWrite(SCL, 1);
 
   SPI.begin();
-  // SPISettings(250000, MSBFIRST, SPI_MODE0);
 
   #ifdef SERIAL_DEBUG
   Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
@@ -49,9 +46,9 @@ void setup() {
   Serial.println();
   #endif
 
-  pinMode(LED_BUILTIN, OUTPUT);
-  act_led_state = 1;
-  digitalWrite(LED_BUILTIN, act_led_state);
+  // pinMode(9, OUTPUT);
+  // act_led_state = 1;
+  // digitalWrite(9, act_led_state);
 
   delay(SERIAL_DELAY);
   // Initialize temperature and RH sensors.
@@ -244,8 +241,8 @@ void loop() {
       Serial.println();
       #endif
     }
-    act_led_state = ~act_led_state;
-    digitalWrite(LED_BUILTIN,act_led_state);
+    // act_led_state = ~act_led_state;
+    // digitalWrite(9,act_led_state);
   }
 }
 

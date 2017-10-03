@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// #include <Wire.h>
 ////////////////////
 #include <SPI.h>
 #include <SD.h>
@@ -23,7 +22,7 @@
 // #include <ESP8266WebServer.h>
 // #include <ESP8266FtpServer.h>
 ////////////////////
-#include "../../../SputnikConfig.h"
+#include "SputnikConfig.h"
 #include "SputnikComm.h"
 #include "SputnikTempRH.h"
 #include "SputnikTemp.h"
@@ -32,7 +31,7 @@
 #define  ACTIVITY_LED_PIN 8
 
 uint32_t millis_start, millis_end, setup_time, acquisition_time;
-uint32_t delayMs;
+uint32_t delayMs, delayMsRequested;
 
 uint8_t i = 0;
 
@@ -42,6 +41,8 @@ String log_file_name, report_file_name, readme_file_name;
 void sd_card_init(void);
 void sensors_awake(void);
 void sensors_sleep(void);
+void sys_restart(void);
+void(* reset_arduino)(void) = 0;
 
 Sd2Card card;
 SdVolume volume;
@@ -49,21 +50,22 @@ SdFile root;
 File log_file, config_file, report_file, readme_file;
 
 DS1302 rtc(52, 50, 48);
-Time t;
+Time t_start, t;
 
 void setup() {
   millis_start = millis();
   // analogReadResolution(12);
-  Wire.begin();
-  Wire1.begin();
   SPI.begin();
   Serial.begin(115200);
+  #ifdef WIFI_ACTIVE
   Serial1.begin(115200);  // Start ESP wifi communication interface
+  #endif
   #ifdef REMOTE_ACTIVE
   Serial2.begin(115200);  // Start communication interface with remote sensors
   delay(100);
   Serial2.write(REMOTE_START);  // Prompt remote sensors for data
   #endif
+  delayMs = (uint32_t)SENSORS_READ_MIN_INTERVAL;
   #ifdef SERIAL_DEBUG
   Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
   Serial.println(".i.SputnikRedeSensores by ecoPlanos.i.");
@@ -80,18 +82,23 @@ void setup() {
   // rtc.setDOW(MONDAY);        // Set Day-of-Week to FRIDAY
   // rtc.setTime(19, 52, 00);     // Set the time to 12:00:00 (24hr format)
   // rtc.setDate(18, 8, 2017);   // Set the date to August 6th, 2010
-  t = rtc.getTime();
-
+  t_start = rtc.getTime();
+  #ifdef SERIAL_DEBUG
+  Serial.println("RTC date and time: "+String(t_start.year)+"/"+String(t_start.mon)+"/"+String(t_start.date)+"/"+String(t_start.hour)+"H"+String(t_start.min)+"M"+String(t_start.sec)+"S");
+  #endif
   report_file_name ="REPORT.LOG";
-  log_file_name = String(t.year)+"/"+String(t.mon)+"/"+String(t.date)+"/"+String(t.hour)+"H"+String(t.min)+"M"+String(t.sec)+".CSV";
+  log_file_name = String(t_start.year)+"/"+String(t_start.mon)+"/"+String(t_start.date)+"/"+String(t_start.hour)+String(t_start.min)+String(t_start.sec)+".CSV";
   sd_present=false;
   #ifdef LOG_SD
+  #ifdef SERIAL_DEBUG
+  Serial.println("Log file will be saved to: "+log_file_name);
+  #endif
   sd_card_init();
   #endif
   delay(SD_CARD_DELAY);
   if(sd_present)
   {
-    SD.mkdir(String(t.year)+"/"+String(t.mon)+"/"+String(t.date));
+    SD.mkdir(String(t_start.year)+"/"+String(t_start.mon)+"/"+String(t_start.date));
   }
 
   if(sd_present)
@@ -99,10 +106,13 @@ void setup() {
     report_file = SD.open(report_file_name, FILE_WRITE);
 
     if (report_file) {
-      report_file.println(String(t.year)+"/"+String(t.mon)+"/"+String(t.date)+"/"+String(t.hour)+"H"+String(t.min)+"M"+String(t.sec));
+      report_file.println(String(t_start.year)+"/"+String(t_start.mon)+"/"+String(t_start.date)+"/"+String(t_start.hour)+"H"+String(t_start.min)+"M"+String(t_start.sec)+"S");
       report_file.println("Starting new acquisition");
       report_file.close();
       report_file_opened=true;
+      #ifdef SERIAL_DEBUG
+      Serial.println("Report file successfuly opened");
+      #endif
     }
     else
     {
@@ -140,6 +150,19 @@ void setup() {
   // Read configuration from SD card
   if(sd_present)
   {
+    #ifdef LOG_SD
+    log_file = SD.open(log_file_name, FILE_WRITE);
+    if (log_file) {
+        log_file.println("year,month,day,time,DHT11 temp (C),DHT11 RH (%),DHT22 temp (C),DHT22 RH (%),SHT75 temp (C),SHT75 RH (%),SHT75 dewp (C),PT100 (Ohm),NTC (Ohm),SHT31 temp (C),SHT31 RH (%),MLX ambient temp (C),MLX object temp (C),Thermopar temp (RAW) ");
+        log_file.close();
+    }
+    else
+    {
+        #ifdef SERIAL_DEBUG
+        Serial.println("Error: Opening file "+log_file_name+" for writing");
+        #endif
+    }
+    #endif
     config_file = SD.open(config_file_name, FILE_READ);
     if (config_file)
     {
@@ -147,9 +170,6 @@ void setup() {
       Serial.println("Config file successfuly open");
       #endif
       String delayMSstr = "";
-      // while (config_file.available()) {
-      //   delayMSstr+=String(config_file.read());
-      // }
       delayMSstr=config_file.readString();
       #ifdef SERIAL_DEBUG
       Serial.print("Config file content string: ");
@@ -158,8 +178,8 @@ void setup() {
       if((((uint32_t)delayMSstr.toInt())>=((uint32_t)SENSORS_READ_MIN_INTERVAL))
       && (((uint32_t)delayMSstr.toInt())<=((uint32_t)SENSORS_READ_MAX_INTERVAL)))
       {
-        delayMs = delayMSstr.toInt();
-        Serial.println(delayMSstr);
+        delayMsRequested = delayMSstr.toInt();
+        delayMs = delayMsRequested;
         #ifdef SERIAL_DEBUG
         Serial.print("Valid delay found at SD card: ");
         Serial.print(delayMs);
@@ -176,6 +196,7 @@ void setup() {
        #endif
       }
       config_file_opened=true;
+      config_file.close();
     }
     else
     {
@@ -217,12 +238,13 @@ void setup() {
       Serial.println("Error: can't open system log file!!!");
       #endif
       report_file_opened=false;
+      report_file.close();
     }
   }
   delay(INITIAL_DELAY);
   // Initialize temperature and RH sensors.
   temp_hr_init();
-  //  Initialize temperature sensors
+  // Initialize temperature sensors
   temp_init();
   millis_end = millis();
   #ifdef SERIAL_DEBUG
@@ -262,13 +284,18 @@ void setup() {
 
 void loop() {
   millis_start = millis();
+  t = rtc.getTime();
+  #ifdef SERIAL_DEBUG
+  Serial.println("RTC date and time: "+String(t.year)+"/"+String(t.mon)+"/"+String(t.date)+"/"+String(t.hour)+"H"+String(t.min)+"M"+String(t.sec)+"S");
+  #endif
+  if(t.date > t_start.date)
+      sys_restart();
+
   digitalWrite(ACTIVITY_LED_PIN,1);
 
   #ifdef REMOTE_ACTIVE
   Serial2.write(REMOTE_START);  // Prompt remote sensors for data
   #endif
-  Serial2.write('\r');
-  Serial2.write('\n');  // Prompt remote sensors for data
   String sd_data_string = "";
   String sd_data_string_tmp = "";
 
@@ -277,7 +304,7 @@ void loop() {
   if(!sd_present)
     sd_card_init();
   #endif
-  sd_data_string+=String(millis_start)+",";
+  sd_data_string+=String(String(t.year)+","+String(t.mon)+","+String(t.date)+","+String(t.hour)+":"+String(t.min)+":"+String(t.sec))+",";
   #ifdef SERIAL_DEBUG
   Serial.println("------------------------------------");
   Serial.println("----------------T&RH----------------");
@@ -429,8 +456,8 @@ void loop() {
     temp_delay = 0XFFFFFFFF-millis_start+temp_millis;
   }
 
-  //Wait for data on serial bus
-  while((Serial2.available()<=0)&&(temp_delay<(delayMs-1000)))
+  // Wait for data on serial bus
+  while((Serial2.available()<=0)&&(temp_delay<(delayMs-100)))
   {
     temp_millis = millis();
     if(temp_millis > millis_start)
@@ -442,45 +469,38 @@ void loop() {
       temp_delay = 0XFFFFFFFF-millis_start+temp_millis;
     }
   }
-
-  if(Serial2.available()>0)
+  #ifdef SERIAL_DEBUG
+  Serial.print("Warning: ");
+  Serial.print(temp_delay);
+  Serial.println(" ms passed while waiting for serial response...");
+  #endif
+  if(Serial2.available())
   {
-    if(Serial2.read()==(char)REMOTE_START)
+    char start_char = Serial2.read();
+    if(start_char == (char)REMOTE_START)
     {
-      sd_data_string_tmp=Serial2.readStringUntil((char)REMOTE_END);
+      sd_data_string_tmp = Serial2.readStringUntil((char)REMOTE_END);
       #ifdef SERIAL_DEBUG
       Serial.print("Received remote sensors data: ");
       Serial.println(sd_data_string_tmp);
       #endif
-      sd_data_string+=sd_data_string_tmp;
+      sd_data_string += sd_data_string_tmp;
       serial_error = 0;
     }
     else
     {
       #ifdef SERIAL_DEBUG
-      Serial.println("Error: Received wrong start character!");
+      Serial.println("Error: Received wrong start character "+String(start_char)+" !");
       #endif
       serial_error = 1;
     }
   }
   else
   {
-    if(i==0)
-    {
-      #ifdef SERIAL_DEBUG
-      Serial.println("Warning: Timeout wainting for remote sensors!");
-      #endif
-      sd_data_string+=",,,,,";
-    }
-    else
-    {
-      sd_data_string += sd_data_string_tmp;
-      #ifdef SERIAL_DEBUG
-      Serial.print("Final data string: ");
-      Serial.println(sd_data_string);
-      #endif
-      i=0;
-    }
+    #ifdef SERIAL_DEBUG
+    Serial.println("Warning: Timeout wainting for remote sensors!");
+    #endif
+    sd_data_string+=",,,,,";
     serial_error = 1;
   }
   #endif
@@ -503,7 +523,7 @@ void loop() {
       digitalWrite(ACTIVITY_LED_PIN,1);
       sd_present = false;
       #ifdef SERIAL_DEBUG
-      Serial.println("error opening "+log_file_name);
+      Serial.println("Error opening "+log_file_name);
       #endif
     }
   }
@@ -555,6 +575,7 @@ void loop() {
   if(acquisition_time >= delayMs)
   {
     delayMs = acquisition_time;
+    delayMsRequested = delayMs;
     #ifdef SERIAL_DEBUG
     Serial.print("Warning: Acquisition time forced to ");
     Serial.print(delayMs);
@@ -575,6 +596,17 @@ void loop() {
         #endif
       }
     }
+  }
+  else{
+      if(acquisition_time > delayMsRequested)
+      {
+          delayMs = acquisition_time;
+          delayMsRequested = delayMs;
+      }
+      else
+      {
+          delayMs = delayMsRequested;
+      }
   }
   // Delay between measurements.
   delay(delayMs-acquisition_time);
@@ -609,4 +641,12 @@ void sd_card_init(void)
 void sensors_awake(void){
 }
 void sensors_sleep(void){
+}
+
+void sys_restart(void){
+    if (log_file)
+      log_file.close();
+    if (report_file)
+      report_file.close();
+    reset_arduino();
 }
