@@ -49,7 +49,7 @@ U 1 1 595D08DD
 P 1600 1300
 F 0 "J1" H 1600 1550 50  0000 C CNN
 F 1 "DHT 11" V 1700 1300 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x04_Pitch1.27mm" H 1600 1300 50  0001 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x04_Pitch2.54mm" H 1600 1300 50  0001 C CNN
 F 3 "" H 1600 1300 50  0001 C CNN
 	1    1600 1300
 	0    -1   -1   0   
@@ -104,7 +104,7 @@ U 1 1 59665A74
 P 9550 2650
 F 0 "Decouplador1" H 9575 2750 50  0000 L CNN
 F 1 "1u" H 9575 2550 50  0000 L CNN
-F 2 "Capacitors_THT:CP_Radial_D4.0mm_P1.50mm" H 9588 2500 50  0001 C CNN
+F 2 "Capacitors_THT:CP_Radial_D5.0mm_P2.50mm" H 9588 2500 50  0001 C CNN
 F 3 "" H 9550 2650 50  0001 C CNN
 	1    9550 2650
 	1    0    0    -1  
@@ -127,7 +127,7 @@ U 1 1 5975ED9D
 P 2050 1300
 F 0 "J2" H 2050 1550 50  0000 C CNN
 F 1 "DHT 22" V 2150 1300 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x04_Pitch1.27mm" H 2050 1300 50  0001 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x04_Pitch2.54mm" H 2050 1300 50  0001 C CNN
 F 3 "" H 2050 1300 50  0001 C CNN
 	1    2050 1300
 	0    -1   -1   0   
@@ -138,12 +138,12 @@ U 1 1 59760071
 P 2550 1300
 F 0 "J3" H 2550 1550 50  0000 C CNN
 F 1 "SHT 75" V 2650 1300 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x04_Pitch1.27mm" H 2550 1300 50  0001 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x04_Pitch2.54mm" H 2550 1300 50  0001 C CNN
 F 3 "" H 2550 1300 50  0001 C CNN
 	1    2550 1300
 	0    -1   -1   0   
 $EndComp
-Text Label 3750 4150 0    47   ~ 0
+Text Label 3850 4050 1    47   ~ 0
 Data75
 NoConn ~ 2100 1500
 $Comp
@@ -152,27 +152,24 @@ U 1 1 59764088
 P 3250 1250
 F 0 "J5" H 3250 1650 50  0000 C CNN
 F 1 "SHT 31" V 3350 1250 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x07_Pitch1.27mm" H 3250 1250 50  0001 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x07_Pitch2.54mm" H 3250 1250 50  0001 C CNN
 F 3 "" H 3250 1250 50  0001 C CNN
 	1    3250 1250
 	0    -1   -1   0   
 $EndComp
 NoConn ~ 2950 1450
-NoConn ~ 3150 1450
-Text Label 3900 4300 0    47   ~ 0
-SDA31
-Text Label 3100 1550 0    47   ~ 0
-SDA31
-Text Label 2600 1600 0    47   ~ 0
-Data75
+Text Label 4050 4200 1    47   ~ 0
+SDA
+Text Label 3250 1600 1    47   ~ 0
+SDA
 Text Label 1900 1600 0    47   ~ 0
 Data22
 Text Label 1400 1600 0    47   ~ 0
 Data11
-Text Label 4150 4350 0    47   ~ 0
-SLC31
-Text Label 3250 1450 0    47   ~ 0
-SCL31
+Text Label 4250 4350 1    47   ~ 0
+SLC
+Text Label 3350 1550 1    47   ~ 0
+SCL
 $Comp
 L GND #PWR02
 U 1 1 59766242
@@ -190,12 +187,12 @@ U 1 1 59768262
 P 4650 1250
 F 0 "J7" H 4650 1400 50  0000 C CNN
 F 1 "NTC" V 4750 1250 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x02_Pitch1.27mm" H 4650 1250 50  0001 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x02_Pitch2.54mm" H 4650 1250 50  0001 C CNN
 F 3 "" H 4650 1250 50  0001 C CNN
 	1    4650 1250
 	0    -1   -1   0   
 $EndComp
-Text Label 4300 4200 0    47   ~ 0
+Text Label 4450 4350 1    47   ~ 0
 DataNTC
 $Comp
 L CONN_01X04 J8
@@ -203,11 +200,33 @@ U 1 1 5976F356
 P 4150 1100
 F 0 "J8" H 4150 1350 50  0000 C CNN
 F 1 "MLX" V 4250 1100 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x04_Pitch1.27mm" H 4150 1100 50  0001 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x04_Pitch2.54mm" H 4150 1100 50  0001 C CNN
 F 3 "" H 4150 1100 50  0001 C CNN
 	1    4150 1100
 	0    -1   -1   0   
 $EndComp
+$Comp
+L CP C2
+U 1 1 59770AF2
+P 4950 2350
+F 0 "C2" H 4975 2450 50  0000 L CNN
+F 1 "1u" H 4975 2250 50  0000 L CNN
+F 2 "Capacitors_THT:CP_Radial_D5.0mm_P2.50mm" H 4988 2200 50  0001 C CNN
+F 3 "" H 4950 2350 50  0001 C CNN
+	1    4950 2350
+	1    0    0    -1  
+$EndComp
+Text Label 3250 3950 1    60   Italic 12
+Data11
+Text Label 3450 3950 1    60   Italic 12
+Data22
+Text Label 3650 4000 1    60   Italic 12
+Clock75
+NoConn ~ 1300 -50 
+Text Label 4100 1350 1    60   ~ 0
+SDA
+Text Label 4000 1350 1    60   ~ 0
+SCL
 Wire Wire Line
 	850  800  9150 800 
 Wire Wire Line
@@ -222,7 +241,7 @@ Wire Wire Line
 	850  4800 850  800 
 Connection ~ 9150 800 
 Wire Wire Line
-	9150 750  9150 4800
+	9150 800  9150 4800
 Wire Wire Line
 	1450 1500 1300 1500
 Wire Wire Line
@@ -333,6 +352,8 @@ Connection ~ 10000 1900
 Wire Wire Line
 	3250 1450 3250 1600
 Wire Wire Line
+	3250 1600 4100 1600
+Wire Wire Line
 	4050 1600 4050 4400
 Wire Wire Line
 	3350 1450 3350 1550
@@ -348,17 +369,6 @@ Connection ~ 3800 800
 Wire Wire Line
 	9550 2800 10000 2800
 Connection ~ 10000 2800
-$Comp
-L CP C2
-U 1 1 59770AF2
-P 4950 2350
-F 0 "C2" H 4975 2450 50  0000 L CNN
-F 1 "1u" H 4975 2250 50  0000 L CNN
-F 2 "Capacitors_THT:CP_Radial_D4.0mm_P1.50mm" H 4988 2200 50  0001 C CNN
-F 3 "" H 4950 2350 50  0001 C CNN
-	1    4950 2350
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	4350 1400 4350 2200
 Wire Wire Line
@@ -391,58 +401,95 @@ Connection ~ 2850 4900
 Wire Wire Line
 	3050 4400 3050 4800
 Connection ~ 3050 4800
-Text Label 3100 4400 0    60   Italic 12
-Data11
-Text Label 3350 4250 0    60   Italic 12
-Data22
-Text Label 3450 4100 0    60   Italic 12
-Clock75
-$Comp
-L Screw_Terminal_1x12 J4
-U 1 1 59769CE6
-P 3950 4600
-F 0 "J4" H 3950 5850 50  0000 C TNN
-F 1 "Screw_Terminal_1x12" V 3800 4600 50  0000 C TNN
-F 2 "Connectors_Terminal_Blocks:TerminalBlock_Pheonix_MPT-2.54mm_12pol" H 3950 3375 50  0001 C CNN
-F 3 "" H 3925 5600 50  0001 C CNN
-	1    3950 4600
-	0    -1   -1   0   
-$EndComp
+Wire Wire Line
+	4000 1300 4000 1550
+Wire Wire Line
+	4100 1600 4100 1300
 Connection ~ 4200 1400
 Wire Wire Line
 	4200 1300 4200 1400
+Connection ~ 4000 1550
+Connection ~ 4050 1600
 Wire Wire Line
-	3250 1600 4050 1600
+	3150 1450 3450 1450
+$Comp
+L CONN_01X02 J10
+U 1 1 59E23A1E
+P 3750 4600
+F 0 "J10" H 3750 4750 50  0000 C CNN
+F 1 "CONN_01X02" V 3850 4600 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x02_Pitch2.54mm" H 3750 4600 50  0001 C CNN
+F 3 "" H 3750 4600 50  0001 C CNN
+	1    3750 4600
+	0    1    1    0   
+$EndComp
+$Comp
+L CONN_01X01 J6
+U 1 1 59E23AE9
+P 3250 4600
+F 0 "J6" H 3250 4700 50  0000 C CNN
+F 1 "CONN_01X01" V 3350 4600 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x01_Pitch2.54mm" H 3250 4600 50  0001 C CNN
+F 3 "" H 3250 4600 50  0001 C CNN
+	1    3250 4600
+	0    1    1    0   
+$EndComp
+$Comp
+L CONN_01X01 J9
+U 1 1 59E23BAD
+P 3450 4600
+F 0 "J9" H 3450 4700 50  0000 C CNN
+F 1 "CONN_01X01" V 3550 4600 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x01_Pitch2.54mm" H 3450 4600 50  0001 C CNN
+F 3 "" H 3450 4600 50  0001 C CNN
+	1    3450 4600
+	0    1    1    0   
+$EndComp
+$Comp
+L CONN_01X02 J11
+U 1 1 59E23DD5
+P 4150 4600
+F 0 "J11" H 4150 4750 50  0000 C CNN
+F 1 "CONN_01X02" V 4250 4600 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x02_Pitch2.54mm" H 4150 4600 50  0001 C CNN
+F 3 "" H 4150 4600 50  0001 C CNN
+	1    4150 4600
+	0    1    1    0   
+$EndComp
+$Comp
+L CONN_01X01 J12
+U 1 1 59E23F13
+P 4450 4600
+F 0 "J12" H 4450 4700 50  0000 C CNN
+F 1 "CONN_01X01" V 4550 4600 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x01_Pitch2.54mm" H 4450 4600 50  0001 C CNN
+F 3 "" H 4450 4600 50  0001 C CNN
+	1    4450 4600
+	0    1    1    0   
+$EndComp
+$Comp
+L CONN_01X02 J4
+U 1 1 59E2423D
+P 2950 4200
+F 0 "J4" H 2950 4350 50  0000 C CNN
+F 1 "CONN_01X02" V 3050 4200 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x02_Pitch2.54mm" H 2950 4200 50  0001 C CNN
+F 3 "" H 2950 4200 50  0001 C CNN
+	1    2950 4200
+	0    -1   -1   0   
+$EndComp
 Wire Wire Line
-	4000 1300 4000 1500
+	2850 4400 2900 4400
 Wire Wire Line
-	4000 1500 4100 1500
+	3000 4400 3050 4400
 Wire Wire Line
-	4100 1500 4100 3950
+	3650 4400 3700 4400
 Wire Wire Line
-	4100 3950 4650 3950
+	3800 4400 3850 4400
 Wire Wire Line
-	4650 3950 4650 4400
+	4050 4400 4100 4400
 Wire Wire Line
-	4100 1300 4100 1450
-Wire Wire Line
-	4100 1450 4150 1450
-Wire Wire Line
-	4150 1450 4150 3900
-Wire Wire Line
-	4150 3900 5050 3900
-Wire Wire Line
-	4850 3900 4850 4400
-Text Label 3850 1300 0    60   ~ 0
-SCL
-Text Label 4050 1300 0    60   ~ 0
-SDA
-Text Label 4600 4350 0    60   ~ 0
-SCL
-Text Label 4750 4300 0    60   ~ 0
-SDA
-NoConn ~ 1300 -50 
-Wire Wire Line
-	5050 3900 5050 4400
-Connection ~ 4850 3900
+	4250 4400 4200 4400
+Connection ~ 2000 1700
+Connection ~ 2700 1750
 $EndSCHEMATC
