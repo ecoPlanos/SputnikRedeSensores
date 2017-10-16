@@ -1,4 +1,4 @@
-update=Ter 08 Ago 2017 18:23:17 WEST
+update=Ter 10 Out 2017 11:44:08 WEST
 version=1
 last_client=kicad
 [pcbnew]
@@ -58,4 +58,3 @@ LibName26=opto
 LibName27=atmel
 LibName28=contrib
 LibName29=valves
-LibName30=/home/gasoile2/Private/Personal/Projects/ecoPlanos/dev/SputnikRedeSensores/Kicad/libs/ArduProMini/ArduProMiniTKB
