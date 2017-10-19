@@ -310,6 +310,17 @@ F 3 "" H 1000 2250 50  0001 C CNN
 	1    1000 2250
 	1    0    0    -1  
 $EndComp
+$Comp
+L CP C3
+U 1 1 59E88507
+P 5800 1000
+F 0 "C3" H 5825 1100 50  0000 L CNN
+F 1 "10u1" H 5825 900 50  0000 L CNN
+F 2 "Capacitors_THT:CP_Radial_Tantal_D9.0mm_P5.00mm" H 5838 850 50  0001 C CNN
+F 3 "" H 5800 1000 50  0001 C CNN
+	1    5800 1000
+	1    0    0    -1  
+$EndComp
 Connection ~ 1000 3150
 Wire Wire Line
 	1000 2800 1000 3150
@@ -357,7 +368,7 @@ Connection ~ 5300 1350
 Wire Wire Line
 	5300 1350 5300 850 
 Wire Wire Line
-	5300 850  5050 850 
+	5050 850  5800 850 
 Wire Wire Line
 	3000 850  3000 1550
 Wire Wire Line
@@ -366,7 +377,7 @@ Connection ~ 3100 3150
 Wire Wire Line
 	3100 1150 3100 3150
 Wire Wire Line
-	4650 1150 3100 1150
+	3100 1150 5800 1150
 Connection ~ 2050 1550
 Wire Wire Line
 	2050 800  2050 1550
@@ -487,4 +498,6 @@ Wire Wire Line
 Wire Wire Line
 	3300 2100 3300 1550
 Connection ~ 3000 1550
+Connection ~ 5300 850 
+Connection ~ 4650 1150
 $EndSCHEMATC
