@@ -96,10 +96,13 @@ void setup() {
   sd_card_init();
   #endif
   delay(SD_CARD_DELAY);
+  
+  #ifdef LOG_SD
   if(sd_present)
   {
     SD.mkdir(String(t_start.year)+"/"+String(t_start.mon)+"/"+String(t_start.date));
   }
+  #endif
 
   if(sd_present)
   {
@@ -290,7 +293,46 @@ void loop() {
   Serial.println("RTC date and time: "+String(t.year)+"/"+String(t.mon)+"/"+String(t.date)+"/"+String(t.hour)+"H"+String(t.min)+"M"+String(t.sec)+"S");
   #endif
   if(t.date > t_start.date)
-      sys_restart();
+  {
+      t_start = t;
+      log_file_name = String(t.year)+"/"+String(t.mon)+"/"+String(t.date)+"/"+String(t.hour)+String(t.min)+String(t.sec)+".CSV";
+      if(sd_present)
+      {
+          #ifdef LOG_SD
+          SD.mkdir(String(t.year)+"/"+String(t.mon)+"/"+String(t.date));
+          log_file = SD.open(log_file_name, FILE_WRITE);
+          if (log_file) {
+              log_file.println("year,month,day,time,DHT11 temp (C),DHT11 RH (%),DHT22 temp (C),DHT22 RH (%),SHT75 temp (C),SHT75 RH (%),SHT75 dewp (C),PT100 (Ohm),NTC (Ohm),SHT31 temp (C),SHT31 RH (%),MLX ambient temp (C),MLX object temp (C),Thermopar temp (RAW) ");
+              log_file.close();
+          }
+          else
+          {
+              #ifdef SERIAL_DEBUG
+              Serial.println("Error: Opening file "+log_file_name+" for writing");
+              #endif
+          }
+          #endif
+        report_file = SD.open(report_file_name, FILE_WRITE);
+
+        if (report_file) {
+          report_file.println(String(t_start.year)+"/"+String(t_start.mon)+"/"+String(t_start.date)+"/"+String(t_start.hour)+"H"+String(t_start.min)+"M"+String(t_start.sec)+"S");
+          report_file.println("Starting new acquisition");
+          report_file.close();
+          report_file_opened=true;
+          #ifdef SERIAL_DEBUG
+          Serial.println("Report file successfuly opened");
+          #endif
+        }
+        else
+        {
+          #ifdef SERIAL_DEBUG
+          Serial.println("Error: can't open system log file!!!");
+          #endif
+          report_file_opened=false;
+        }
+      }
+    //   sys_restart();
+  }
 
   digitalWrite(ACTIVITY_LED_PIN,1);
 
@@ -647,5 +689,6 @@ void sys_restart(void){
       log_file.close();
     if (report_file)
       report_file.close();
+
     reset_arduino();
 }

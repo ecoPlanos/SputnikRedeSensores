@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name ecoPlanos_custom)(type KiCad)(uri /home/gasoile/git/SputnikRedeSensores/Kicad/libs/ecoPlanos/ecoPlanos_custom.pretty)(options "")(descr ""))
+  (lib (name freetronics_footprints)(type KiCad)(uri /home/gasoile/git/SputnikRedeSensores/Kicad/libs/freetronics_kicad_library-master/freetronics_footprints.pretty)(options "")(descr ""))
+)
