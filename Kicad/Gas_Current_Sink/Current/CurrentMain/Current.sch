@@ -1,5 +1,4 @@
 EESchema Schematic File Version 2
-LIBS:ecoPlanos_custom
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -30,7 +29,6 @@ LIBS:atmel
 LIBS:contrib
 LIBS:valves
 LIBS:Common-Parts-Library
-LIBS:freetronics_schematic
 LIBS:Current-cache
 EELAYER 25 0
 EELAYER END
@@ -500,4 +498,12 @@ Wire Wire Line
 Connection ~ 3000 1550
 Connection ~ 5300 850 
 Connection ~ 4650 1150
+Text Label 4350 3000 0    60   ~ 0
+ACS770
+Text Label 4350 2450 0    60   ~ 0
+ACS712
+Text Label 6650 3050 0    60   ~ 0
+PA3208
+Text Label 7300 2700 0    60   ~ 0
+SCT
 $EndSCHEMATC
