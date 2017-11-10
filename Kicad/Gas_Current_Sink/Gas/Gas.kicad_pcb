@@ -3,13 +3,13 @@
   (general
     (links 27)
     (no_connects 0)
-    (area 44.650001 70.899999 217.85 156.700001)
+    (area 67.924999 70.924999 203.075001 146.075001)
     (thickness 1.6)
     (drawings 28)
     (tracks 115)
     (zones 0)
     (modules 31)
-    (nets 15)
+    (nets 16)
   )
 
   (page A4)
@@ -105,6 +105,7 @@
   (net 12 /MG811_out)
   (net 13 /MQ135_out_5v)
   (net 14 MQ135_out_3V3)
+  (net 15 "Net-(J3-Pad3)")
 
   (net_class Default "This is the default net class."
     (clearance 0.2)
@@ -123,6 +124,7 @@
     (add_net MQ135_out_3V3)
     (add_net "Net-(D1-Pad2)")
     (add_net "Net-(D2-Pad2)")
+    (add_net "Net-(J3-Pad3)")
     (add_net "Net-(J5-Pad1)")
   )
 
@@ -536,7 +538,8 @@
       (net 1 GND))
     (pad 2 thru_hole oval (at 0 2.54 90) (size 1.7 1.7) (drill 1) (layers *.Cu *.Mask)
       (net 13 /MQ135_out_5v))
-    (pad 3 thru_hole oval (at 0 5.08 90) (size 1.7 1.7) (drill 1) (layers *.Cu *.Mask))
+    (pad 3 thru_hole oval (at 0 5.08 90) (size 1.7 1.7) (drill 1) (layers *.Cu *.Mask)
+      (net 15 "Net-(J3-Pad3)"))
     (pad 4 thru_hole oval (at 0 7.62 90) (size 1.7 1.7) (drill 1) (layers *.Cu *.Mask)
       (net 2 +5V))
     (model ${KISYS3DMOD}/Pin_Headers.3dshapes/Pin_Header_Straight_1x04_Pitch2.54mm.wrl
