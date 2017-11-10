@@ -566,4 +566,8 @@ $EndComp
 Wire Wire Line
 	5750 7400 5750 7550
 Connection ~ 5750 7550
+Text Label 3850 3500 0    60   ~ 0
+Activity_LED
+Text Label 3850 3400 0    60   ~ 0
+CCS811_nRST
 $EndSCHEMATC

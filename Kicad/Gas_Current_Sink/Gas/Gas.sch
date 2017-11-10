@@ -378,4 +378,6 @@ Text Label 1950 1500 0    60   ~ 0
 MG811_out
 Text Label 4450 1500 0    60   ~ 0
 MQ135_out_5v
+Text Label 3300 2150 0    60   ~ 0
+Activity_Led
 $EndSCHEMATC

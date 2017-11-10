@@ -13,24 +13,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SPUTNIKGAS_H_
-#define SPUTNIKGAS_H_
+#ifndef SPUTNIKCURRENT_H_
+#define SPUTNIKCURRENT_H_
 
 #include <Arduino.h>
-#include <SparkFunCCS811.h>
+#include <AnalogSensors.h>
 
-#define MG811_PIN A5
-#define MQ135_PIN A4
-#define CCS811_NWAK 13
-#define CCS811_NINT 12
-#define CCS811_NRST A6
-#define CCS811_ADDR 0x5B //Default I2C Address
+#define ACS770_PIN A0
+#define ACS712_PIN A1
+#define PA3208_PIN A2
+#define SCT013_PIN A3
 
-extern uint16_t mg811_analog;
-extern uint16_t mq135_analog;
-
-extern CCS811 ccs811;
-//
-void sputnikGasInit(void);
+extern analog_sensor acs770, acs712, pa3208, sct013;
+void sputnikCurrentInit(void);
 
 #endif
