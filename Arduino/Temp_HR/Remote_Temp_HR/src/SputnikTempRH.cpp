@@ -14,7 +14,7 @@ void temp_hr_init(void)
   }
   else
   {
-      #ifdef LOG_SERIAL
+      #ifdef SERIAL_DEBUG
       Serial.println("Couldn't find SHT31");
       #endif
   }
@@ -31,7 +31,7 @@ void temp_hr_sensors_check(void)
     }
     else
     {
-        #ifdef LOG_SERIAL
+        #ifdef SERIAL_DEBUG
         Serial.println("Couldn't find SHT31");
         #endif
     }

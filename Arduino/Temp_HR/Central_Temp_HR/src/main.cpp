@@ -96,7 +96,7 @@ void setup() {
   sd_card_init();
   #endif
   delay(SD_CARD_DELAY);
-  
+
   #ifdef LOG_SD
   if(sd_present)
   {
