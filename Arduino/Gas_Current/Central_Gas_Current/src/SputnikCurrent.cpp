@@ -1,6 +1,7 @@
 #include "SputnikCurrent.h"
 
 analog_sensor acs770, acs712, pa3208, sct013;
+float_t acs770_current_rms, acs712_current_rms, pa3208_current_rms, sct013_current_rms;
 
 void sputnikCurrentInit(void)
 {

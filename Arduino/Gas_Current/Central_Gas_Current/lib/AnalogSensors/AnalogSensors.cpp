@@ -68,7 +68,7 @@ void analog_sensor::sample_triger(void)
     uint16_t analog_buff = 0;
     #endif
 
-    _analog_max = 0;
+    _adc_max = 0;
     for(i = 0; i<_samp_nr; i++)
     {
         _samples[i] = analogRead(_pin);
@@ -76,15 +76,15 @@ void analog_sensor::sample_triger(void)
         if(i > 0)
             filter_cntr = (analog_buff == _samples[i])  ;
         if(filter_cntr)
-            _analog_max = _analog_max < _samples[i] ? _samples[i] : _analog_max;
+            _adc_max = _adc_max < _samples[i] ? _samples[i] : _adc_max;
         analog_buff = _samples[i];
         #else
-        _analog_max = _analog_max < _samples[i] ? _samples[i] : _analog_max;
+        _adc_max = _adc_max < _samples[i] ? _samples[i] : _adc_max;
         #endif
         delayMicroseconds(_delay_us);
         #ifdef SERIAL_DEBUG
-        Serial.print("_analog_max: ");
-        Serial.println(_analog_max);
+        Serial.print("_adc_max: ");
+        Serial.println(_adc_max);
         Serial.print("Analog sample[");
         Serial.print(i);
         Serial.print("]: ");
@@ -93,7 +93,7 @@ void analog_sensor::sample_triger(void)
     }
     #ifdef SERIAL_DEBUG
     Serial.print("Analog max: ");
-    Serial.println( _analog_max);
+    Serial.println( _adc_max);
     #endif
 }
 
@@ -106,7 +106,7 @@ void analog_sensor::get_last_sampling(uint16_t *samples)
     samples = _samples;
 }
 
-uint16_t analog_sensor::get_analog_max(void)
+uint16_t analog_sensor::get_adc_max(void)
 {
-    return _analog_max;
+    return _adc_max;
 }
