@@ -24,7 +24,7 @@
 ////////////////////
 #define SOFTWARE_VERSION      100
 #define INITIAL_DELAY         100
-#define SENSORS_READ_MIN_INTERVAL 2000     //Sensors read minimum interval (2s)
+#define SENSORS_READ_MIN_INTERVAL 500     //Sensors read minimum interval (2s)
 #define SENSORS_READ_MAX_INTERVAL 1800000  //Sensors read maximum interval (30min)
 #define  ACTIVITY_LED_PIN A7
 
@@ -39,7 +39,7 @@
 #define RTC_IO      48
 
 #define LOG_SD
-#define SERIAL_DEBUG
+// #define SERIAL_DEBUG
 
 const String log_file_sufix="Data.csv";
 const String config_file_name="SPUTNIK.CFG";
@@ -66,6 +66,10 @@ File log_file, config_file, report_file;
 
 DS1302 rtc(RTC_CE, RTC_IO, RTC_SCK);
 Time t_start, t;
+
+#ifdef SERIAL_DEBUG
+uint16_t acs770_adc_max_map, acs712_adc_max_map, pa3208_adc_max_map, sct013_adc_max_map;
+#endif
 
 void setup() {
   millis_start = millis();
@@ -142,7 +146,11 @@ void setup() {
       #ifdef LOG_SD
       log_file = SD.open(log_file_name, FILE_WRITE);
       if (log_file) {
-          log_file.println("year,month,day,time,MG811 (Analog),MQ135 (Analog),CCS188 (CO2),CCS188 (TVOC),ACS770 (Analog_max),ACS712 (Analog_max),PA3208 (Analog_max),SCT0-13 (Analog_max)");
+          #ifdef SERIAL_DEBUG
+          log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS770 (ADC map),ACS770 (ADC RAW),ACS712 (Current RMS (A)),ACS712 (ADC map),ACS712 (ADC RAW),PA3208 (Current RMS (A)),PA3208 (ADC map),PA3208 (ADC RAW),SCT0-13 (Current RMS (A)),SCT0-13 (ADC map),SCT0-13 (ADC RAW)");
+          #else
+          log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS712 (Current RMS (A)),PA3208 (Current RMS (A)),SCT0-13 (Current RMS (A))");
+          #endif
           log_file.close();
       }
       else
@@ -288,7 +296,11 @@ void loop() {
           SD.mkdir(String(t.year)+"/"+String(t.mon)+"/"+String(t.date));
           log_file = SD.open(log_file_name, FILE_WRITE);
           if (log_file) {
-              log_file.println("year,month,day,time,MG811 (Analog),MQ135 (Analog),CCS188 (CO2),CCS188 (TVOC),ACS770 (Analog_max),ACS712 (Analog_max),PA3208 (Analog_max),SCT0-13 (Analog_max)");
+              #ifdef SERIAL_DEBUG
+              log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS770 (ADC map),ACS770 (ADC RAW),ACS712 (Current RMS (A)),ACS712 (ADC map),ACS712 (ADC RAW),PA3208 (Current RMS (A)),PA3208 (ADC map),PA3208 (ADC RAW),SCT0-13 (Current RMS (A)),SCT0-13 (ADC map),SCT0-13 (ADC RAW)");
+              #else
+              log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS712 (Current RMS (A)),PA3208 (Current RMS (A)),SCT0-13 (Current RMS (A))");
+              #endif
               log_file.close();
           }
           else
@@ -336,14 +348,14 @@ void loop() {
   #endif
   mg811_analog=analogRead(MG811_PIN);
   #ifdef SERIAL_DEBUG
-  Serial.print("MG811 Analog: ");
+  Serial.print("MG811 ADC-12Bit: ");
   Serial.println(mg811_analog);
   #endif
   sd_data_string+=String(mg811_analog)+",";
 
   mq135_analog=map(analogRead(MQ135_PIN),0,3917,0,4096);       //Max output voltage: 3.146
   #ifdef SERIAL_DEBUG
-  Serial.print("MQ135 Analog: ");
+  Serial.print("MQ135 ADC-12Bit: ");
   Serial.println(mq135_analog);
   #endif
   sd_data_string+=String(mq135_analog)+",";
@@ -375,17 +387,43 @@ void loop() {
   acs712.sample_triger();
   pa3208.sample_triger();
   sct013.sample_triger();
+  acs770_current_rms = (float_t)(acs770.get_adc_max()-ACS770_CAL_MIN)*(float_t)(3.35/(ACS770_AVG_335-ACS770_CAL_MIN));
+  acs712_current_rms = (float_t)(acs712.get_adc_max()-ACS712_CAL_MIN)*(float_t)(3.35/(ACS712_AVG_335-ACS712_CAL_MIN));
+  pa3208_current_rms = (float_t)(pa3208.get_adc_max()-PA3208_CAL_MIN)*(float_t)(3.35/(PA3208_AVG_335-PA3208_CAL_MIN));
+  sct013_current_rms = (float_t)(sct013.get_adc_max()-SCT013_CAL_MIN)*(float_t)(3.35/(SCT013_AVG_335-SCT013_CAL_MIN));
   #ifdef SERIAL_DEBUG
-  Serial.print("ACS770 Analog max: ");
-  Serial.println(acs770.get_analog_max());
-  Serial.print("ACS712 Analog max: ");
-  Serial.println(acs712.get_analog_max());
-  Serial.print("PA3208 Analog max: ");
-  Serial.println(pa3208.get_analog_max());
-  Serial.print("SCT0-13 Analog max: ");
-  Serial.println(sct013.get_analog_max());
+  acs770_adc_max_map = abs(map(acs770.get_adc_max(),ACS770_CAL_MIN,ACS770_CAL_MAX,0,4095));
+  acs712_adc_max_map = abs(map(acs712.get_adc_max(),ACS712_CAL_MIN,ACS712_CAL_MAX,0,4095));
+  pa3208_adc_max_map = abs(map(pa3208.get_adc_max(),PA3208_CAL_MIN,PA3208_CAL_MAX,0,4095));
+  sct013_adc_max_map = abs(map(sct013.get_adc_max(),SCT013_CAL_MIN,SCT013_CAL_MAX,0,4095));
+  Serial.print("ACS770 Current RMS: ");
+  Serial.println(acs770_current_rms);
+  Serial.print("ACS712 Current RMS: ");
+  Serial.println(acs712_current_rms);
+  Serial.print("PA3208 Current RMS: ");
+  Serial.println(pa3208_current_rms);
+  Serial.print("SCT0-13 Current RMS: ");
+  Serial.println(sct013_current_rms);
+  Serial.print("ACS770 ADC Max Map: ");
+  Serial.println(acs770_adc_max_map);
+  Serial.print("ACS712 ADC Max Map: ");
+  Serial.println(acs712_adc_max_map);
+  Serial.print("PA3208 ADC Max Map: ");
+  Serial.println(pa3208_adc_max_map);
+  Serial.print("SCT0-13 ADC Max Map: ");
+  Serial.println(sct013_adc_max_map);
+  Serial.print("ACS770 ADC Max RAW: ");
+  Serial.println(acs770.get_adc_max());
+  Serial.print("ACS712 ADC Max RAW: ");
+  Serial.println(acs712.get_adc_max());
+  Serial.print("PA3208 ADC Max RAW: ");
+  Serial.println(pa3208.get_adc_max());
+  Serial.print("SCT0-13 ADC Max RAW: ");
+  Serial.println(sct013.get_adc_max());
+  sd_data_string+=String(acs770_current_rms)+","+String(acs770_adc_max_map)+","+String(acs770.get_adc_max())+","+String(acs712_current_rms)+","+String(acs712_adc_max_map)+","+String(acs712.get_adc_max())+","+String(pa3208_current_rms)+","+String(pa3208_adc_max_map)+","+String(pa3208.get_adc_max())+","+String(sct013_current_rms)+","+String(sct013_adc_max_map)+","+String(sct013.get_adc_max())+",";
+  #else
+  sd_data_string+=String(acs770_current_rms)+","+String(acs712_current_rms)+","+String(pa3208_current_rms)+","+String(sct013_current_rms)+",";
   #endif
-  sd_data_string+=String(acs770.get_analog_max())+","+String(acs712.get_analog_max())+","+String(pa3208.get_analog_max())+","+String(sct013.get_analog_max())+",";
 #ifdef LOG_SD
   // Log to SD card
   if(sd_present)

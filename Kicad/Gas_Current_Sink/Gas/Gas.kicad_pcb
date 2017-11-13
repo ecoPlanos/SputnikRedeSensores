@@ -3,7 +3,7 @@
   (general
     (links 27)
     (no_connects 0)
-    (area 67.924999 70.924999 203.075001 146.075001)
+    (area 44.650001 70.899999 217.85 156.700001)
     (thickness 1.6)
     (drawings 28)
     (tracks 115)
@@ -825,8 +825,8 @@
     (pad 1 thru_hole circle (at 0 0) (size 4.064 4.064) (drill 3.048) (layers *.Cu *.Mask))
   )
 
-  (module Connectors:1pin locked (layer F.Cu) (tedit 5861332C) (tstamp 599E23D4)
-    (at 88 114.5)
+  (module Connectors:1pin (layer F.Cu) (tedit 5861332C) (tstamp 599E23D4)
+    (at 87.7 114.5)
     (descr "module 1 pin (ou trou mecanique de percage)")
     (tags DEV)
     (fp_text reference REF** (at 0 -3.048) (layer F.SilkS)

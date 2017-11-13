@@ -37,7 +37,7 @@ class analog_sensor
         void sample_triger(void);
         void set_samp_nr(uint16_t samp_nr);
         void get_last_sampling(uint16_t *samples);
-        uint16_t get_analog_max(void);
+        uint16_t get_adc_max(void);
         uint16_t get_analog_min(void);
     private:
         uint8_t _pin;
@@ -45,7 +45,7 @@ class analog_sensor
         uint16_t _samp_nr;
         uint32_t _sig_period;
         uint32_t _delay_us;
-        uint16_t _analog_max;
+        uint16_t _adc_max;
         uint16_t _analog_min;
 };
 
