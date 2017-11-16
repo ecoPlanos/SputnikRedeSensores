@@ -176,8 +176,6 @@ Connection ~ 2700 3850
 Wire Wire Line
 	2800 2300 2700 2300
 Connection ~ 2700 2300
-Wire Wire Line
-	5100 2300 3400 2300
 Connection ~ 4900 3850
 Wire Wire Line
 	2950 3250 3400 3250
@@ -202,7 +200,7 @@ NoConn ~ 3550 3000
 Wire Wire Line
 	5100 3850 5100 3150
 Wire Wire Line
-	5100 3050 5100 2300
+	5100 3050 5100 2450
 Text Label 3050 2800 0    60   ~ 0
 TX
 Text Label 3150 2900 0    60   ~ 0
@@ -215,4 +213,20 @@ Wire Wire Line
 	2700 2700 3550 2700
 Wire Wire Line
 	3550 3600 2700 3600
+Wire Wire Line
+	5100 2450 2700 2450
+Connection ~ 2700 2450
+$Comp
+L GND #PWR?
+U 1 1 5A0CEF92
+P 3550 2300
+F 0 "#PWR?" H 3550 2050 50  0001 C CNN
+F 1 "GND" H 3550 2150 50  0000 C CNN
+F 2 "" H 3550 2300 50  0001 C CNN
+F 3 "" H 3550 2300 50  0001 C CNN
+	1    3550 2300
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	3400 2300 3550 2300
 $EndSCHEMATC
