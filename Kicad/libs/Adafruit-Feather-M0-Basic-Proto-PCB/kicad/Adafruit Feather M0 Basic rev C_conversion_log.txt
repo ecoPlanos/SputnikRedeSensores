@@ -1,0 +1,114 @@
+#********** START OF renumber-sheet.ulp ULP Version 4.4.4 14-11-2017 :00:44:12 LOG **********#
+#OldRef				SheetNumber	NewRef
+CHG				1	CHG40
+L				1	L40
+#********** END OF renumber-sheet.ulp ULP Version 4.4.4 14-11-2017 :00:44:12 LOG **********#
+
+#********** START OF fix_via_hack.ulp ULP Version 4.8.0 14-11-2017 :00:44:58 LOG **********#
+VIA	ViaCount=1		Net=GND				(X=2413.000000 Y=11430.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=2		Net=GND				(X=9652.000000 Y=10541.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=3		Net=GND				(X=9017.000000 Y=18923.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=4		Net=GND				(X=13843.000000 Y=5588.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=5		Net=GND				(X=9271.000000 Y=7239.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=6		Net=GND				(X=18161.000000 Y=18415.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=7		Net=GND				(X=22352.000000 Y=9652.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=8		Net=GND				(X=24130.000000 Y=11430.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=9		Net=GND				(X=25908.000000 Y=9525.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=10		Net=GND				(X=30099.000000 Y=11684.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=11		Net=GND				(X=29083.000000 Y=4191.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=12		Net=GND				(X=8382.000000 Y=15621.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=13		Net=N$6				(X=31750.000000 Y=8890.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=14		Net=N$8				(X=44450.000000 Y=16510.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=15		Net=N$9				(X=44450.000000 Y=13970.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=16		Net=N$10				(X=46990.000000 Y=13970.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=17		Net=N$11				(X=46990.000000 Y=16510.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=18		Net=N$12				(X=49530.000000 Y=16510.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=19		Net=N$13				(X=49530.000000 Y=13970.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=20		Net=N$14				(X=49530.000000 Y=11430.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=21		Net=N$15				(X=49530.000000 Y=8890.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=22		Net=N$16				(X=46990.000000 Y=8890.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=23		Net=N$17				(X=46990.000000 Y=11430.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=24		Net=N$18				(X=44450.000000 Y=11430.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=25		Net=N$19				(X=44450.000000 Y=8890.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=26		Net=N$20				(X=44450.000000 Y=6350.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=27		Net=N$21				(X=46990.000000 Y=6350.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=28		Net=N$22				(X=31750.000000 Y=6350.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=29		Net=N$24				(X=41910.000000 Y=6350.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=30		Net=N$25				(X=41910.000000 Y=8890.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=31		Net=N$26				(X=41910.000000 Y=11430.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=32		Net=N$27				(X=41910.000000 Y=13970.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=33		Net=N$28				(X=41910.000000 Y=16510.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=34		Net=N$30				(X=39370.000000 Y=16510.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=35		Net=N$31				(X=39370.000000 Y=13970.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=36		Net=N$32				(X=39370.000000 Y=11430.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=37		Net=N$33				(X=39370.000000 Y=8890.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=38		Net=N$34				(X=39370.000000 Y=6350.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=39		Net=N$35				(X=36830.000000 Y=6350.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=40		Net=N$36				(X=36830.000000 Y=8890.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=41		Net=N$37				(X=36830.000000 Y=11430.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=42		Net=N$38				(X=36830.000000 Y=13970.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=43		Net=N$39				(X=36830.000000 Y=16510.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=44		Net=N$40				(X=34290.000000 Y=16510.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=45		Net=N$41				(X=34290.000000 Y=13970.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=46		Net=N$42				(X=34290.000000 Y=11430.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=47		Net=N$43				(X=34290.000000 Y=8890.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=48		Net=N$44				(X=34290.000000 Y=6350.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=49		Net=N$45				(X=49530.000000 Y=6350.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=50		Net=N$46				(X=31750.000000 Y=13970.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=51		Net=N$47				(X=31750.000000 Y=11430.000000)	LayerStart=1	LayerEnd=16
+VIA	ViaCount=52		Net=N$48				(X=31750.000000 Y=16510.000000)	LayerStart=1	LayerEnd=16
+PADFILL	PadCount=2		Net=GND				(X=17780.000000 Y=12661.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=4		Net=GND				(X=17653.000000 Y=8343.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=6		Net=GND				(X=11430.000000 Y=10226.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=8		Net=GND				(X=16383.000000 Y=8343.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=10		Net=GND				(X=29210.000000 Y=14544.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=12		Net=GND				(X=8088.000000 Y=13909.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=14		Net=GND				(X=16400.000000 Y=12712.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=16		Net=GND				(X=13858.000000 Y=10674.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=18		Net=GND				(X=11568.800000 Y=4344.593750)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=52		Net=GND				(X=1595.000000 Y=17359.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=60		Net=GND				(X=21629.000000 Y=17399.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=64		Net=GND				(X=12993.000000 Y=4318.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=66		Net=GND				(X=7398.000000 Y=7277.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=68		Net=GND				(X=11398.000000 Y=7277.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=75		Net=GND				(X=23380.000000 Y=6177.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=88		Net=GND				(X=27605.000000 Y=9402.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=105		Net=GND				(X=21880.000000 Y=13127.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=112		Net=GND				(X=20655.000000 Y=9902.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=119		Net=GND				(X=24130.000000 Y=9652.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=125		Net=GND				(X=18161.000000 Y=16794.100000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=130		Net=GND				(X=13843.000000 Y=9047.100000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=134		Net=GND				(X=9795.000000 Y=15604.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=140		Net=GND				(X=2445.000000 Y=12180.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=141		Net=GND				(X=2445.000000 Y=10680.000000)	LayerStart=1	LayerEnd=1
+PADFILL	PadCount=144		Net=GND				(X=5220.000000 Y=10130.000000)	LayerStart=1	LayerEnd=1
+#********** END OF fix_via_hack.ulp ULP Version 4.8.0 14-11-2017 :00:44:58 LOG **********#
+
+#********** START OF eagle6xx-sch-to-kicad-sch.ulp 2.0 14-11-2017 :00:47:02 LOG **********#
+Device Name Conflict: Device=GND from internal SCH lib=microbuilder with device=GND from LIB=supply1
+Symbol Name Conflict: Symbol=GND from internal SCH lib=microbuilder with symbol=GND from LIB=supply1
+Device Name Conflict: Device=GND from internal SCH lib=supply1 with device=GND from LIB=microbuilder
+Symbol Name Conflict: Symbol=GND from internal SCH lib=supply1 with symbol=GND from LIB=microbuilder
+#********** END OF eagle6xx-sch-to-kicad-sch.ulp 2.0 14-11-2017 :00:47:02 LOG **********#
+
+#********** START OF exp-lbrs.ulp 6.8 14-11-2017 :00:49:07 LOG **********#
+OK: Eagle library export from SCH/PCB successful
+    Conversion completed with no messages
+#********** END OF exp-lbrs.ulp 6.8 14-11-2017 :00:49:07 LOG **********#
+
+
+#********** START OF eagle-lbr2kicad-1.0.ulp 3.1 14-11-2017 :00:49:21 LOG **********#
+Missing Prefix Part =_QFN				MICROBUILDER_TQFN48_7MM					Adafruit Feather M0 Basic rev C		M
+Missing Prefix Part =''				NO-PACKAGE					Adafruit Feather M0 Basic rev C		M
+Missing Prefix Part =''				MICROBUILDER_MOUNTINGHOLE_3.0_PLATED_VIAS					Adafruit Feather M0 Basic rev C		M
+Missing Prefix Part =1.0				MICROBUILDER_MOUNTINGHOLE_1.0_PLATED					Adafruit Feather M0 Basic rev C		M
+Missing Prefix Part =2.0				MICROBUILDER_MOUNTINGHOLE_2.0_PLATED					Adafruit Feather M0 Basic rev C		M
+Missing Prefix Part =2.5				MICROBUILDER_MOUNTINGHOLE_2.5_PLATED					Adafruit Feather M0 Basic rev C		M
+Missing Prefix Part =2.5_THICK				MICROBUILDER_MOUNTINGHOLE_2.5_PLATED_THICK					Adafruit Feather M0 Basic rev C		M
+Missing Prefix Part =3.0				MICROBUILDER_MOUNTINGHOLE_3.0_PLATED					Adafruit Feather M0 Basic rev C		M
+Missing Prefix Part =3.0SQUARE				MICROBUILDER_MOUNTINGHOLE_3.0_PLATED_SQUAREVIAS					Adafruit Feather M0 Basic rev C		M
+Missing Prefix Part =3.0THIN				MICROBUILDER_MOUNTINGHOLE_3.0_PLATEDTHIN					Adafruit Feather M0 Basic rev C		M
+Missing Prefix Part =''				NO-PACKAGE					Adafruit Feather M0 Basic rev C		M
+Missing Prefix Part =''				NO-PACKAGE					Adafruit Feather M0 Basic rev C		M
+#********** END OF eagle-lbr2kicad-1.0.ulp 3.1 14-11-2017 :00:49:21 LOG **********#
+

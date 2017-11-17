@@ -1,0 +1,51 @@
+Cmp-Mod V01 Created by PcbNew   date = Qua 15 Nov 2017 11:50:53 WET
+
+BeginCmp
+TimeStamp = 5A0A406A
+Path = 
+Reference = U$32;
+ValeurCmp = [NoVal];
+IdModule  = MOUNTINGHOLE_2.5_PLATED;
+EndCmp
+
+BeginCmp
+TimeStamp = 00000000
+Path = 
+Reference = [NoRef];
+ValeurCmp = [NoVal];
+IdModule  = ;
+EndCmp
+
+BeginCmp
+TimeStamp = 00000000
+Path = 
+Reference = [NoRef];
+ValeurCmp = [NoVal];
+IdModule  = ;
+EndCmp
+
+BeginCmp
+TimeStamp = 5A0A4061
+Path = 
+Reference = U$31;
+ValeurCmp = [NoVal];
+IdModule  = MOUNTINGHOLE_2.5_PLATED;
+EndCmp
+
+BeginCmp
+TimeStamp = 5A0A412C
+Path = 
+Reference = [NoRef];
+ValeurCmp = [NoVal];
+IdModule  = 1X16_ROUND;
+EndCmp
+
+BeginCmp
+TimeStamp = 5A0A45CF
+Path = 
+Reference = [NoRef];
+ValeurCmp = [NoVal];
+IdModule  = 1X12_ROUND;
+EndCmp
+
+EndListe

@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name "Adafruit Feather M0 Basic rev C")(type Legacy)(uri "/home/gasoile/git/SputnikRedeSensores/Kicad/libs/Adafruit-Feather-M0-Basic-Proto-PCB/kicad/Adafruit Feather M0 Basic rev C.mod")(options "")(descr ""))
+)
