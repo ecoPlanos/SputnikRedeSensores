@@ -99,7 +99,7 @@ Text GLabel 2400 3800 3    60   Input ~ 0
 GND
 Text GLabel 2400 2250 1    60   Input ~ 0
 5V
-Text GLabel 1650 2450 0    60   Input ~ 0
+Text GLabel 1400 2450 0    60   Input ~ 0
 SE-10_OUT
 $Comp
 L R R3
@@ -225,12 +225,12 @@ ZRE200GE
 $Comp
 L C C1
 U 1 1 5A0C1F63
-P 1900 2450
-F 0 "C1" H 1925 2550 50  0000 L CNN
-F 1 "22u" H 1925 2350 50  0000 L CNN
-F 2 "Capacitors_THT:CP_Radial_D5.0mm_P2.50mm" H 1938 2300 50  0001 C CNN
-F 3 "" H 1900 2450 50  0001 C CNN
-	1    1900 2450
+P 1700 2450
+F 0 "C1" H 1725 2550 50  0000 L CNN
+F 1 "22u" H 1725 2350 50  0000 L CNN
+F 2 "Capacitors_THT:CP_Radial_D5.0mm_P2.50mm" H 1738 2300 50  0001 C CNN
+F 3 "" H 1700 2450 50  0001 C CNN
+	1    1700 2450
 	0    1    1    0   
 $EndComp
 $Comp
@@ -338,7 +338,7 @@ Connection ~ 2150 3250
 Wire Wire Line
 	2150 3700 2150 3800
 Wire Wire Line
-	2150 3800 2400 3800
+	1900 3800 2400 3800
 Wire Wire Line
 	1000 1050 1000 1000
 Wire Wire Line
@@ -409,9 +409,9 @@ Wire Notes Line
 Wire Notes Line
 	7300 550  4000 550 
 Wire Wire Line
-	2200 2450 2050 2450
+	2200 2450 1850 2450
 Wire Wire Line
-	1750 2450 1650 2450
+	1550 2450 1400 2450
 Wire Notes Line
 	7550 550  7550 6500
 Wire Notes Line
@@ -641,4 +641,21 @@ Wire Notes Line
 	4000 7200 4000 5250
 Text Notes 5500 7100 2    60   ~ 12
 XBee
+$Comp
+L R R6
+U 1 1 5A0DEF5A
+P 1900 2750
+F 0 "R6" V 1980 2750 50  0000 C CNN
+F 1 "4.62K" V 1800 2750 50  0000 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 1830 2750 50  0001 C CNN
+F 3 "" H 1900 2750 50  0001 C CNN
+	1    1900 2750
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1900 2450 1900 2600
+Connection ~ 1900 2450
+Wire Wire Line
+	1900 2900 1900 3800
+Connection ~ 2150 3800
 $EndSCHEMATC
