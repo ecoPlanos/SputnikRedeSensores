@@ -41,6 +41,10 @@
 #define LOG_SD
 // #define SERIAL_DEBUG
 
+#define MOTION_START 0xFE
+#define LIGHT_START 0xFD
+#define REMOTE_END 0xFF
+
 const String log_file_sufix="Data.csv";
 const String config_file_name="SPUTNIK.CFG";
 
@@ -76,9 +80,7 @@ void setup() {
   analogReadResolution(12);
   SPI.begin();
   Serial.begin(115200);
-  #ifdef WIFI_ACTIVE
-  Serial1.begin(115200);  // Start ESP wifi communication interface
-  #endif
+  Serial1.begin(9600);
 
   delayMs = (uint32_t)SENSORS_READ_MIN_INTERVAL;
   #ifdef SERIAL_DEBUG
@@ -94,9 +96,9 @@ void setup() {
   rtc.halt(false);
   rtc.writeProtect(false);
   //Adjust RTC Date And Time
-  // rtc.setDOW(THURSDAY);           // Set Day-of-Week to FRIDAY
-  // rtc.setTime(22, 10, 00);     // Set the time
-  // rtc.setDate(9, 11, 2017);   // Set the date
+  // rtc.setDOW(THURSDAY);      // Set Day-of-Week to FRIDAY
+  // rtc.setTime(22, 10, 00);   // Set the time
+  // rtc.setDate(9, 11, 2017);  // Set the date
   t_start = rtc.getTime();
   #ifdef SERIAL_DEBUG
   Serial.println("RTC date and time: "+String(t_start.year)+"/"+String(t_start.mon)+"/"+String(t_start.date)+"/"+String(t_start.hour)+"H"+String(t_start.min)+"M"+String(t_start.sec)+"S");
@@ -147,9 +149,9 @@ void setup() {
       log_file = SD.open(log_file_name, FILE_WRITE);
       if (log_file) {
           #ifdef SERIAL_DEBUG
-          log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS770 (ADC map),ACS770 (ADC RAW),ACS712 (Current RMS (A)),ACS712 (ADC map),ACS712 (ADC RAW),PA3208 (Current RMS (A)),PA3208 (ADC map),PA3208 (ADC RAW),SCT0-13 (Current RMS (A)),SCT0-13 (ADC map),SCT0-13 (ADC RAW)");
+          log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS770 (ADC map),ACS770 (ADC RAW),ACS712 (Current RMS (A)),ACS712 (ADC map),ACS712 (ADC RAW),PA3208 (Current RMS (A)),PA3208 (ADC map),PA3208 (ADC RAW),SCT0-13 (Current RMS (A)),SCT0-13 (ADC map),SCT0-13 (ADC RAW), SEN0192 (nr), SE-10 (nr), ZRE200GE (nr), EKMB1101111 (nr)");
           #else
-          log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS712 (Current RMS (A)),PA3208 (Current RMS (A)),SCT0-13 (Current RMS (A))");
+          log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS712 (Current RMS (A)),PA3208 (Current RMS (A)),SCT0-13 (Current RMS (A)), SEN0192 (nr), SE-10 (nr), ZRE200GE (nr), EKMB1101111 (nr)");
           #endif
           log_file.close();
       }
@@ -297,9 +299,9 @@ void loop() {
           log_file = SD.open(log_file_name, FILE_WRITE);
           if (log_file) {
               #ifdef SERIAL_DEBUG
-              log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS770 (ADC map),ACS770 (ADC RAW),ACS712 (Current RMS (A)),ACS712 (ADC map),ACS712 (ADC RAW),PA3208 (Current RMS (A)),PA3208 (ADC map),PA3208 (ADC RAW),SCT0-13 (Current RMS (A)),SCT0-13 (ADC map),SCT0-13 (ADC RAW)");
+              log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS770 (ADC map),ACS770 (ADC RAW),ACS712 (Current RMS (A)),ACS712 (ADC map),ACS712 (ADC RAW),PA3208 (Current RMS (A)),PA3208 (ADC map),PA3208 (ADC RAW),SCT0-13 (Current RMS (A)),SCT0-13 (ADC map),SCT0-13 (ADC RAW), SEN0192 (nr), SE-10 (nr), ZRE200GE (nr), EKMB1101111 (nr)");
               #else
-              log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS712 (Current RMS (A)),PA3208 (Current RMS (A)),SCT0-13 (Current RMS (A))");
+              log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS712 (Current RMS (A)),PA3208 (Current RMS (A)),SCT0-13 (Current RMS (A)), SEN0192 (nr), SE-10 (nr), ZRE200GE (nr), EKMB1101111 (nr)");
               #endif
               log_file.close();
           }
@@ -333,7 +335,9 @@ void loop() {
 
   digitalWrite(ACTIVITY_LED_PIN,1);
 
+  Serial1.write(MOTION_START);
   String sd_data_string = "";
+  String sd_data_string_tmp = "";
 
   sensors_awake();
   #ifdef LOG_SD
@@ -424,6 +428,79 @@ void loop() {
   #else
   sd_data_string+=String(acs770_current_rms)+","+String(acs712_current_rms)+","+String(pa3208_current_rms)+","+String(sct013_current_rms)+",";
   #endif
+
+  #ifdef SERIAL_DEBUG
+  Serial.println("------------------------------------");
+  Serial.println("---------------REMOTE---------------");
+  Serial.println("------------------------------------");
+  #endif
+  uint32_t temp_millis = millis();
+  uint32_t temp_delay;
+  if(temp_millis > millis_start)
+  {
+    temp_delay = temp_millis-millis_start;
+  }
+  else
+  {
+    temp_delay = 0XFFFFFFFF-millis_start+temp_millis;
+  }
+
+  // Wait for data on serial bus
+  while((Serial1.available()<=0)&&(temp_delay<(delayMs-100)))
+  {
+    temp_millis = millis();
+    if(temp_millis > millis_start)
+    {
+      temp_delay = temp_millis-millis_start;
+    }
+    else
+    {
+      temp_delay = 0XFFFFFFFF-millis_start+temp_millis;
+    }
+  }
+  #ifdef SERIAL_DEBUG
+  Serial.print("Warning: ");
+  Serial.print(temp_delay);
+  Serial.println(" ms passed while waiting for serial response...");
+  #endif
+  if(Serial1.available())
+  {
+    char start_char = Serial1.read();
+    switch (start_char) {
+        case (char)MOTION_START:
+            sd_data_string_tmp = Serial1.readStringUntil((char)REMOTE_END);
+            #ifdef SERIAL_DEBUG
+            Serial.print("Received Motion sensors data: ");
+            Serial.println(sd_data_string_tmp);
+            #endif
+            sd_data_string += sd_data_string_tmp;
+            serial_error = 0;
+        break;
+        case (char) LIGHT_START:
+            sd_data_string_tmp = Serial1.readStringUntil((char)REMOTE_END);
+            #ifdef SERIAL_DEBUG
+            Serial.print("Received Light sensors data: ");
+            Serial.println(sd_data_string_tmp);
+            #endif
+            sd_data_string += sd_data_string_tmp;
+            serial_error = 0;
+        break;
+        default:
+            #ifdef SERIAL_DEBUG
+            Serial.println("Error: Received wrong start character "+String(start_char)+" !");
+            #endif
+            serial_error = 1;
+        break;
+    }
+  }
+  else
+  {
+    #ifdef SERIAL_DEBUG
+    Serial.println("Warning: Timeout wainting for remote sensors!");
+    #endif
+    sd_data_string+=",,,,";
+    serial_error = 1;
+  }
 #ifdef LOG_SD
   // Log to SD card
   if(sd_present)
