@@ -297,7 +297,7 @@ Text GLabel 10000 2600 0    60   Input ~ 12
 A1
 Text GLabel 10000 2700 0    60   Input ~ 12
 SE-10_OUT_
-Text GLabel 10000 2800 0    60   UnSpc ~ 12
+Text GLabel 8650 4150 0    60   UnSpc ~ 12
 GND
 Text GLabel 10000 3000 0    60   Output ~ 12
 3V3
@@ -1008,4 +1008,38 @@ Connection ~ 1500 1150
 Wire Wire Line
 	1500 1000 1500 950 
 Connection ~ 1500 1000
+$Comp
+L Conn_01x02 J9
+U 1 1 5A11B7B1
+P 9150 4550
+F 0 "J9" H 9150 4650 50  0000 C CNN
+F 1 "3V3 Output" V 9250 4500 50  0000 C CNN
+F 2 "Connectors_Molex:Molex_KK-6410-02_02x2.54mm_Straight" H 9150 4550 50  0001 C CNN
+F 3 "" H 9150 4550 50  0001 C CNN
+	1    9150 4550
+	0    1    1    0   
+$EndComp
+Text GLabel 8650 3750 0    60   Output ~ 12
+ACTIVITY_LED
+$Comp
+L R Ra11
+U 1 1 5A11C1D6
+P 9050 3950
+F 0 "Ra11" V 9130 3950 50  0000 C CNN
+F 1 "100K" V 8950 3950 50  0000 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 8980 3950 50  0001 C CNN
+F 3 "" H 9050 3950 50  0001 C CNN
+	1    9050 3950
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8650 3750 9050 3750
+Wire Wire Line
+	9050 3750 9050 3800
+Wire Wire Line
+	8650 4150 9150 4150
+Wire Wire Line
+	9150 4150 9150 4350
+Wire Wire Line
+	9050 4100 9050 4350
 $EndSCHEMATC
