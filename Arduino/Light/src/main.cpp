@@ -39,7 +39,11 @@
 
 #define TSL2561_I2C_ADDR    TSL2561_ADDR_0
 #define ISL29125_I2C_ADDR   ISL_I2C_ADDR
+#if defined (__arm__)
 #define ISL29125_TRIG_PIN   12
+#elif defined(__AVR_ATmega328P__)
+#define ISL29125_TRIG_PIN   2
+#endif
 #define SI1145_I2C_ADDR     SI1145_ADDR
 
 #define ACTIVITY_LED_PIN 13
@@ -83,6 +87,11 @@ void setup()
     Serial_data.begin(9600); //XBee com port
     #endif
     Wire.begin();
+    #if defined(__AVR_ATmega328P__)
+    //disable i2c internal pullups to work with MLX and SHT31
+    digitalWrite(SDA, 0);
+    digitalWrite(SCL, 0);
+    #endif
     #ifdef DEBUG
     Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
     Serial.println(".i.SputnikRedeSensores by ecoPlanos.i.");
@@ -176,6 +185,8 @@ void setup()
     }
     else
         si1145_error = 0;
+
+    delay_ms = ACQUISITION_T;
 
     loop_started = 0;
     sensors_awake();
@@ -406,11 +417,6 @@ void loop()
             temp_delay = 0XFFFFFFFF-millis_start+temp_millis;
           }
         }
-        #ifdef DEBUG
-        Serial.print("Warning: ");
-        Serial.print(temp_delay);
-        Serial.println(" ms passed while waiting for serial response...");
-        #endif
         if(Serial_data.available())
         {
             serial_comand = Serial_data.read();
@@ -420,6 +426,14 @@ void loop()
                 Serial_data.print(serial_data_string);
                 Serial_data.write(REMOTE_END);
             }
+        }
+        else
+        {
+            #ifdef DEBUG
+            Serial.print("Timeout: ");
+            Serial.print(temp_delay);
+            Serial.println(" ms passed while waiting for serial response...");
+            #endif
         }
     }
     millis_end = millis();
