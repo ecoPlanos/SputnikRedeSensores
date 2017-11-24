@@ -158,7 +158,7 @@ void loop()
         digitalWrite(ACTIVITY_LED_PIN,act_led_state);
     }
 
-    if(Serial1.available())
+    while(Serial1.available())
     {
         char start_char = Serial1.read();
         if(start_char == (char)MOTION_START)

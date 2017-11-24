@@ -63,7 +63,7 @@ void setup() {
   Serial.print("millis_end: ");
   Serial.println(millis_end);
   #endif
-  if(millis_end > millis_start)
+  if(millis_end >= millis_start)
   {
     setup_time = millis_end-millis_start;
   }
@@ -203,7 +203,7 @@ void loop() {
       Serial.print("millis_end: ");
       Serial.println(millis_end);
       #endif
-      if(millis_end > millis_start)
+      if(millis_end >= millis_start)
       {
         acquisition_time = millis_end-millis_start;
       }

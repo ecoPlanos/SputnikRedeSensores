@@ -19,7 +19,7 @@
 #include "SparkFunISL29125.h"
 #include "Adafruit_SI1145.h"
 
-#define DEBUG
+// #define DEBUG
 
 #define LIGHT_START     0xFD
 #define REMOTE_END      0xFF
@@ -250,6 +250,7 @@ void loop()
 
     if(!loop_started)
     {
+        loop_started = 1;
         delay(delay_ms);
     }
 
@@ -281,7 +282,8 @@ void loop()
       if (good) Serial.println("no"); else Serial.println("yes");
       #endif
 
-      serial_data_string+=String(data0)+","+String(data1)+","+String(lux)+","+String(good);
+    //   serial_data_string+=String(data0)+","+String(data1)+","+String(lux)+","+String(good);
+      serial_data_string+=String(data0)+","+String(data1)+","+String(lux);
     }
     else
     {
@@ -290,7 +292,7 @@ void loop()
       tsl2561_printError(tsl2561.getError());
       #endif
 
-      serial_data_string += ",,,";
+      serial_data_string += ",,";
     }
 
     uint16_t si1145_visible = si1145.readVisible(), si1145_ir = si1145.readIR();
@@ -398,44 +400,30 @@ void loop()
       temp_delay = 0XFFFFFFFF-millis_start+temp_millis;
     }
 
-    if(!loop_started)
+    // Wait for data on serial bus
+    while((Serial_data.available()<=0)&&(temp_delay<(delay_ms-100)))
     {
-        loop_started = 1;
+      temp_millis = millis();
+      if(temp_millis > millis_start)
+      {
+        temp_delay = temp_millis-millis_start;
+      }
+      else
+      {
+        temp_delay = 0XFFFFFFFF-millis_start+temp_millis;
+      }
     }
-    else
+    while(Serial_data.available())
     {
-        // Wait for data on serial bus
-        while((Serial_data.available()<=0)&&(temp_delay<(delay_ms-100)))
+        serial_comand = Serial_data.read();
+        if(serial_comand == (char)LIGHT_START)
         {
-          temp_millis = millis();
-          if(temp_millis > millis_start)
-          {
-            temp_delay = temp_millis-millis_start;
-          }
-          else
-          {
-            temp_delay = 0XFFFFFFFF-millis_start+temp_millis;
-          }
-        }
-        if(Serial_data.available())
-        {
-            serial_comand = Serial_data.read();
-            if(serial_comand == (char)LIGHT_START)
-            {
-                Serial_data.write(LIGHT_START);
-                Serial_data.print(serial_data_string);
-                Serial_data.write(REMOTE_END);
-            }
-        }
-        else
-        {
-            #ifdef DEBUG
-            Serial.print("Timeout: ");
-            Serial.print(temp_delay);
-            Serial.println(" ms passed while waiting for serial response...");
-            #endif
+            Serial_data.write(LIGHT_START);
+            Serial_data.print(serial_data_string);
+            Serial_data.write(REMOTE_END);
         }
     }
+
     millis_end = millis();
     #ifdef DEBUG
     Serial.print("millis_start: ");
