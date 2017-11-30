@@ -107,9 +107,9 @@ F 3 "" H 1700 3400 50  0001 C CNN
 	1    1700 3400
 	-1   0    0    1   
 $EndComp
-Text GLabel 4650 7000 0    60   Input ~ 0
-SDA
 Text GLabel 4650 7150 0    60   Input ~ 0
+SDA
+Text GLabel 4650 7000 0    60   Input ~ 0
 SCL
 $Comp
 L Conn_01x06 J6
