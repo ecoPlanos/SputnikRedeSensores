@@ -1,4 +1,5 @@
 EESchema Schematic File Version 2
+LIBS:Reed_Mov_Dist-rescue
 LIBS:power
 LIBS:device
 LIBS:switches
@@ -34,7 +35,6 @@ LIBS:valves
 LIBS:ecoPlanos_custom
 LIBS:freetronics_schematic
 LIBS:ArduProMiniTKB
-LIBS:lis3dh
 LIBS:agg-kicad
 LIBS:Reed_Mov_Dist-cache
 EELAYER 25 0
@@ -52,7 +52,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L ARDUPROMINI-6 uP1
+L ARDUPROMINI-6-RESCUE-Reed_Mov_Dist uP1
 U 1 1 5A1D41F9
 P 5600 4450
 F 0 "uP1" H 5000 3650 60  0000 C CNN
@@ -343,13 +343,13 @@ Text GLabel 5950 1900 2    60   Input ~ 0
 SCL
 NoConn ~ 5750 1800
 NoConn ~ 5750 1700
-Text GLabel 9600 5400 2    60   Input ~ 0
-TRIG_HC_HV
 Text GLabel 9600 5300 2    60   Input ~ 0
+TRIG_HC_HV
+Text GLabel 9600 5400 2    60   Input ~ 0
 ECHO_HC_HV
-Text GLabel 9600 5600 2    60   Input ~ 0
-TRIG_URM_HV
 Text GLabel 9600 5500 2    60   Input ~ 0
+TRIG_URM_HV
+Text GLabel 9600 5600 2    60   Input ~ 0
 ECHO_URM_HV
 Text GLabel 8600 5300 0    60   Input ~ 0
 TRIG_HC
@@ -401,7 +401,7 @@ F 3 "" H 1450 7150 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Text GLabel 1300 6350 0    60   Input ~ 0
-3V3
+3V3_Xbee
 Text GLabel 1300 7250 0    60   Input ~ 0
 GND
 Text GLabel 4250 5650 0    60   Input ~ 0
@@ -685,4 +685,23 @@ $EndComp
 Wire Wire Line
 	5600 6150 5700 6150
 NoConn ~ 5600 6450
+Text GLabel 1100 5750 2    60   Input ~ 0
+3V3_Xbee
+Wire Wire Line
+	1100 5900 1100 5750
+Text GLabel 1000 5750 0    60   Input ~ 0
+3V3
+Wire Wire Line
+	1000 5750 1000 5900
+$Comp
+L Conn_01x02 J13
+U 1 1 5A1F6CFC
+P 1100 6100
+F 0 "J13" H 1100 6200 50  0000 C CNN
+F 1 "Conn_01x02" H 1100 5900 50  0000 C CNN
+F 2 "Socket_Strips:Socket_Strip_Straight_1x02_Pitch2.54mm" H 1100 6100 50  0001 C CNN
+F 3 "" H 1100 6100 50  0001 C CNN
+	1    1100 6100
+	0    1    1    0   
+$EndComp
 $EndSCHEMATC
