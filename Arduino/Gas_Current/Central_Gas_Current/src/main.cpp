@@ -41,15 +41,20 @@
 #define LOG_SD
 // #define SERIAL_DEBUG
 
-#define MOTION_START 0xFE
-#define LIGHT_START 0xFD
-#define REMOTE_END 0xFF
+#define MOTION_START    0xFE
+#define LIGHT_START     0xFD
+#define WINDOWS_START   0xFC
+#define REMOTE_END      0xFF
 
 const String log_file_sufix="Data.csv";
 const String config_file_name="SPUTNIK.CFG";
 
 const char* ssid = "SSID";
 const char* password = "PASS";
+
+const String MOTION_FAIL_STR = ",,,,";
+const String LIGHT_FAIL_STR = ",,,,,,,,,";
+const String WINDOWS_FAIL_STR = ",,,,,,,,,,,,,,,,,";     //TODO: only listed ultrasonic sensors
 
 uint32_t millis_start, millis_end, setup_time, acquisition_time;
 uint32_t delayMs, delayMsRequested, temp_delay;
@@ -151,9 +156,9 @@ void setup() {
       log_file = SD.open(log_file_name, FILE_WRITE);
       if (log_file) {
           #ifdef SERIAL_DEBUG
-          log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS770 (ADC map),ACS770 (ADC RAW),ACS712 (Current RMS (A)),ACS712 (ADC map),ACS712 (ADC RAW),PA3208 (Current RMS (A)),PA3208 (ADC map),PA3208 (ADC RAW),SCT0-13 (Current RMS (A)),SCT0-13 (ADC map),SCT0-13 (ADC RAW),SEN0192 (nr),SE-10 (nr),ZRE200GE (nr),EKMB1101111 (nr),TSL2561 data0,TSL2561 data1,TSL2561 lux,SI1145 visible,SI1145 IR,SI1145 UV,ISL29125 Red,ISL29125 Green,ISL29125 Blue");
+          log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS770 (ADC map),ACS770 (ADC RAW),ACS712 (Current RMS (A)),ACS712 (ADC map),ACS712 (ADC RAW),PA3208 (Current RMS (A)),PA3208 (ADC map),PA3208 (ADC RAW),SCT0-13 (Current RMS (A)),SCT0-13 (ADC map),SCT0-13 (ADC RAW),SEN0192 (nr),SE-10 (nr),ZRE200GE (nr),EKMB1101111 (nr),TSL2561 data0,TSL2561 data1,TSL2561 lux,SI1145 visible,SI1145 IR,SI1145 UV,ISL29125 Red,ISL29125 Green,ISL29125 Blue,HC-SRO4 (cm),URM37 (cm),LV-EZ (cm),LV-EZ (mv),itg3200_gx,itg3200_gy,itg3200_gz,itg3200_x_move_count,itg3200_y_move_count,itg3200_z_move_count,itg3200_detected,lis3dh_ax,lis3dh_ay,lis3dh_az,lis3dh_x_move_count,lis3dh_y_move_count,lis3dh_z_move_count,lis3dh_detected");
           #else
-          log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS712 (Current RMS (A)),PA3208 (Current RMS (A)),SCT0-13 (Current RMS (A)),SEN0192 (nr),SE-10 (nr),ZRE200GE (nr),EKMB1101111 (nr),TSL2561 data0,TSL2561 data1,TSL2561 lux,SI1145 visible,SI1145 IR,SI1145 UV,ISL29125 Red,ISL29125 Green,ISL29125 Blue");
+          log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS712 (Current RMS (A)),PA3208 (Current RMS (A)),SCT0-13 (Current RMS (A)),SEN0192 (nr),SE-10 (nr),ZRE200GE (nr),EKMB1101111 (nr),TSL2561 data0,TSL2561 data1,TSL2561 lux,SI1145 visible,SI1145 IR,SI1145 UV,ISL29125 Red,ISL29125 Green,ISL29125 Blue,HC-SRO4 (cm),URM37 (cm),LV-EZ (cm),LV-EZ (mv),itg3200_gx,itg3200_gy,itg3200_gz,itg3200_x_move_count,itg3200_y_move_count,itg3200_z_move_count,itg3200_detected,lis3dh_ax,lis3dh_ay,lis3dh_az,lis3dh_x_move_count,lis3dh_y_move_count,lis3dh_z_move_count,lis3dh_detected");
           #endif
           log_file.close();
       }
@@ -301,9 +306,9 @@ void loop() {
           log_file = SD.open(log_file_name, FILE_WRITE);
           if (log_file) {
               #ifdef SERIAL_DEBUG
-              log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS770 (ADC map),ACS770 (ADC RAW),ACS712 (Current RMS (A)),ACS712 (ADC map),ACS712 (ADC RAW),PA3208 (Current RMS (A)),PA3208 (ADC map),PA3208 (ADC RAW),SCT0-13 (Current RMS (A)),SCT0-13 (ADC map),SCT0-13 (ADC RAW),SEN0192 (nr),SE-10 (nr),ZRE200GE (nr),EKMB1101111 (nr),TSL2561 data0,TSL2561 data1,TSL2561 lux,SI1145 visible,SI1145 IR,SI1145 UV,ISL29125 Red,ISL29125 Green,ISL29125 Blue");
+              log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS770 (ADC map),ACS770 (ADC RAW),ACS712 (Current RMS (A)),ACS712 (ADC map),ACS712 (ADC RAW),PA3208 (Current RMS (A)),PA3208 (ADC map),PA3208 (ADC RAW),SCT0-13 (Current RMS (A)),SCT0-13 (ADC map),SCT0-13 (ADC RAW),SEN0192 (nr),SE-10 (nr),ZRE200GE (nr),EKMB1101111 (nr),TSL2561 data0,TSL2561 data1,TSL2561 lux,SI1145 visible,SI1145 IR,SI1145 UV,ISL29125 Red,ISL29125 Green,ISL29125 Blue,HC-SRO4 (cm),URM37 (cm),LV-EZ (cm),LV-EZ (mv),itg3200_gx,itg3200_gy,itg3200_gz,itg3200_x_move_count,itg3200_y_move_count,itg3200_z_move_count,itg3200_detected,lis3dh_ax,lis3dh_ay,lis3dh_az,lis3dh_x_move_count,lis3dh_y_move_count,lis3dh_z_move_count,lis3dh_detected");
               #else
-              log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS712 (Current RMS (A)),PA3208 (Current RMS (A)),SCT0-13 (Current RMS (A)),SEN0192 (nr),SE-10 (nr),ZRE200GE (nr),EKMB1101111 (nr),TSL2561 data0,TSL2561 data1,TSL2561 lux,SI1145 visible,SI1145 IR,SI1145 UV,ISL29125 Red,ISL29125 Green,ISL29125 Blue");
+              log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC),ACS770 (Current RMS (A)),ACS712 (Current RMS (A)),PA3208 (Current RMS (A)),SCT0-13 (Current RMS (A)),SEN0192 (nr),SE-10 (nr),ZRE200GE (nr),EKMB1101111 (nr),TSL2561 data0,TSL2561 data1,TSL2561 lux,SI1145 visible,SI1145 IR,SI1145 UV,ISL29125 Red,ISL29125 Green,ISL29125 Blue,HC-SRO4 (cm),URM37 (cm),LV-EZ (cm),LV-EZ (mv),itg3200_gx,itg3200_gy,itg3200_gz,itg3200_x_move_count,itg3200_y_move_count,itg3200_z_move_count,itg3200_detected,lis3dh_ax,lis3dh_ay,lis3dh_az,lis3dh_x_move_count,lis3dh_y_move_count,lis3dh_z_move_count,lis3dh_detected");
               #endif
               log_file.close();
           }
@@ -339,9 +344,10 @@ void loop() {
 
   Serial1.write(MOTION_START);
   Serial1.write(LIGHT_START);
+  Serial1.write(WINDOWS_START);
 
   String sd_data_string = "";
-  String motion_data_string = "", light_data_string = "";
+  String motion_data_string = "", light_data_string = "", windows_data_string = "";
 
   sensors_awake();
   #ifdef LOG_SD
@@ -475,6 +481,11 @@ void loop() {
                     remote_data_received |= 0x02;
                     serial_error = 0;
                 break;
+                case (char)WINDOWS_START:
+                    windows_data_string = Serial1.readStringUntil((char)REMOTE_END);
+                    remote_data_received |= 0x04;
+                    serial_error = 0;
+                break;
                 default:
                     serial_error = 1;
                 break;
@@ -484,22 +495,37 @@ void loop() {
     switch(remote_data_received)
     {
         case 0x01:
-            sd_data_string  += motion_data_string
-                            + ",,,,,,,,,";
+            sd_data_string  += motion_data_string + ","
+                            + LIGHT_FAIL_STR
+                            + WINDOWS_FAIL_STR;
         break;
         case 0x02:
-            sd_data_string  += ",,,,"
-                            + light_data_string;
+            sd_data_string  += MOTION_FAIL_STR
+                            + light_data_string + ","
+                            + WINDOWS_FAIL_STR;
         break;
         case 0x03:
             sd_data_string  += motion_data_string + ","
-                            + light_data_string;
+                            + light_data_string + ","
+                            + WINDOWS_FAIL_STR;
+        break;
+        case 0x04:
+            sd_data_string  += MOTION_FAIL_STR
+                            + LIGHT_FAIL_STR
+                            + windows_data_string;
+        break;
+        case 0x07:
+            sd_data_string  += motion_data_string + ","
+                            + light_data_string + ","
+                            + windows_data_string;
         break;
         default:
             #ifdef SERIAL_DEBUG
             Serial.println("Warning: Timeout wainting for remote sensors!");
             #endif
-            sd_data_string  += ",,,,,,,,,,,,,";
+            sd_data_string  +=  MOTION_FAIL_STR
+                            +   LIGHT_FAIL_STR
+                            +   WINDOWS_FAIL_STR;
             serial_error = 1;
         break;
     }
@@ -508,7 +534,7 @@ void loop() {
 
     #ifdef SERIAL_DEBUG
     Serial.print("Received data string: ");
-    Serial.println(final_remote_str);
+    Serial.println(sd_data_string);
     #endif
 
 #ifdef LOG_SD
