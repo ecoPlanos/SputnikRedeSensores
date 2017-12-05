@@ -24,7 +24,7 @@
 ////////////////////
 #define SOFTWARE_VERSION      100
 #define INITIAL_DELAY         100
-#define SENSORS_READ_MIN_INTERVAL 500     //Sensors read minimum interval (2s)
+#define SENSORS_READ_MIN_INTERVAL 750       //Sensors read minimum interval (750ms)
 #define SENSORS_READ_MAX_INTERVAL 1800000  //Sensors read maximum interval (30min)
 #define ACTIVITY_LED_PIN A7
 
@@ -92,7 +92,8 @@ void setup() {
     Serial1.begin(9600);
     remote_data_received = 0;
 
-    delayMs = (uint32_t)SENSORS_READ_MIN_INTERVAL;
+    co2_delay_req = current_delay_req = motion_delay_req = light_delay_req = windows_delay_req = (uint32_t)SENSORS_READ_MIN_INTERVAL;
+
     #ifdef SERIAL_DEBUG
     Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
     Serial.println(".i.SputnikRedeSensores by ecoPlanos.i.");
@@ -308,7 +309,7 @@ void loop() {
         co2_sensors_sleep();
     }
 
-    if(calc_elapsed_time(co2_millis_start,millis_temp) >= co2_delay_req)
+    if(calc_elapsed_time(current_millis_start,millis_temp) >= current_delay_req)
     {
         t = rtc.getTime();
         check_t();
@@ -388,6 +389,7 @@ void loop() {
 #ifdef LOG_SD
                 log_sd(light_log_file_name, light_sd_data_string);
 #endif
+                remote_data_received |= 0x02;
             break;
             case (char)WINDOWS_START:
                 t = rtc.getTime();
@@ -397,6 +399,7 @@ void loop() {
 #ifdef LOG_SD
                 log_sd(windows_log_file_name, windows_sd_data_string);
 #endif
+                remote_data_received |= 0x04;
             break;
             default:
             break;
@@ -645,10 +648,10 @@ void check_t(void)
 }
 
 void co2_sensors_awake(void){
-  digitalWrite(CCS811_NWAK, LOW);
+    digitalWrite(CCS811_NWAK, LOW);
 }
 void co2_sensors_sleep(void){
-  digitalWrite(CCS811_NWAK, HIGH);
+    digitalWrite(CCS811_NWAK, HIGH);
 }
 
 uint32_t calc_elapsed_time(uint32_t start_time, uint32_t end_time)
@@ -656,11 +659,11 @@ uint32_t calc_elapsed_time(uint32_t start_time, uint32_t end_time)
     uint32_t elapsed_time;
     if(end_time >= start_time)
     {
-      elapsed_time = end_time-start_time;
+        elapsed_time = end_time-start_time;
     }
     else
     {
-      elapsed_time = 0XFFFFFFFF-start_time+end_time;
+        elapsed_time = 0XFFFFFFFF-start_time+end_time;
     }
     return elapsed_time;
 }
