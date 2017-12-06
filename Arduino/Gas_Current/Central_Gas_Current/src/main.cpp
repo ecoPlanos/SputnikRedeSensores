@@ -24,11 +24,17 @@
 ////////////////////
 #define SOFTWARE_VERSION      100
 #define INITIAL_DELAY         100
-#define SENSORS_READ_MIN_INTERVAL 750       //Sensors read minimum interval (750ms)
-#define SENSORS_READ_MAX_INTERVAL 1800000  //Sensors read maximum interval (30min)
-#define ACTIVITY_LED_PIN A7
+#define SENSORS_READ_MIN_INTERVAL 750
+#define CO2_READ_MIN_INTERVAL 500
+#define CURRENT_READ_MIN_INTERVAL 250
+#define MOTION_READ_MIN_INTERVAL 750
+#define LIGHT_READ_MIN_INTERVAL 750
+#define WINDOWS_READ_MIN_INTERVAL 750
+#define SENSORS_READ_MAX_INTERVAL 1800000
+#define SENSOR_MODULES_TOTAL 5
+#define ACTIVITY_LED_PIN 61
 
-#define SD_CHIP_SEL           4//10
+#define SD_CHIP_SEL           4
 #define SD_CARD_DELAY         500
 #define SD_MAX_TRIES          3
 #define SERIAL_DELAY          500
@@ -46,7 +52,7 @@
 #define WINDOWS_START   0xFC
 #define REMOTE_END      0xFF
 
-const String config_file_name="CO2.CFG";
+const String config_file_name="SPUTNIK.CFG";
 
 const char* ssid = "SSID";
 const char* password = "PASS";
@@ -94,7 +100,7 @@ void setup() {
 
     co2_delay_req = current_delay_req = motion_delay_req = light_delay_req = windows_delay_req = (uint32_t)SENSORS_READ_MIN_INTERVAL;
 
-    #ifdef SERIAL_DEBUG
+#ifdef SERIAL_DEBUG
     Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
     Serial.println(".i.SputnikRedeSensores by ecoPlanos.i.");
     Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
@@ -124,38 +130,169 @@ void setup() {
 
     if(sd_present)
     {
+        uint8_t tmp_cntr = 0;
         config_file = SD.open(config_file_name, FILE_READ);
         if (config_file)
         {
 #ifdef SERIAL_DEBUG
             Serial.println("Config file successfuly open");
 #endif
-            String delayMSstr = "";
-            delayMSstr=config_file.readString();
-#ifdef SERIAL_DEBUG
-            Serial.print("Config file content string: ");
-            Serial.println(delayMSstr);
-#endif
-            if((((uint32_t)delayMSstr.toInt())>=((uint32_t)SENSORS_READ_MIN_INTERVAL))
-            && (((uint32_t)delayMSstr.toInt())<=((uint32_t)SENSORS_READ_MAX_INTERVAL)))
+            while(config_file.available())
             {
-                delayMsRequested = delayMSstr.toInt();
-                delayMs = delayMsRequested;
+                tmp_cntr ++;
+                String delayMSstr = "";
+                delayMSstr=config_file.readString();
+                switch(tmp_cntr)
+                {
+                    case 1:
+                        if((((uint32_t)delayMSstr.toInt())>=((uint32_t)CO2_READ_MIN_INTERVAL))
+                        && (((uint32_t)delayMSstr.toInt())<=((uint32_t)SENSORS_READ_MAX_INTERVAL)))
+                        {
+                            co2_delay_req = delayMSstr.toInt();
 #ifdef SERIAL_DEBUG
-                Serial.print("Valid delay found at SD card: ");
-                Serial.print(delayMs);
-                Serial.println("ms");
+                            Serial.print("CO2 period (ms): ");
+                            Serial.println(co2_delay_req);
 #endif
+                        }
+                        else
+                        {
+                            co2_delay_req = (uint32_t)CO2_READ_MIN_INTERVAL;
+#ifdef SERIAL_DEBUG
+                            Serial.print("Waring: Invalid CO2 period found at SD card: ");
+                            Serial.println(delayMSstr);
+#endif
+                        }
+                    break;
+                    case 2:
+                        if((((uint32_t)delayMSstr.toInt())>=((uint32_t)CURRENT_READ_MIN_INTERVAL))
+                        && (((uint32_t)delayMSstr.toInt())<=((uint32_t)SENSORS_READ_MAX_INTERVAL)))
+                        {
+                            current_delay_req = delayMSstr.toInt();
+#ifdef SERIAL_DEBUG
+                            Serial.print("Current period (ms): ");
+                            Serial.println(current_delay_req);
+#endif
+                        }
+                        else
+                        {
+                            current_delay_req = (uint32_t)CURRENT_READ_MIN_INTERVAL;
+#ifdef SERIAL_DEBUG
+                            Serial.print("Waring: Invalid current period found at SD card: ");
+                            Serial.println(delayMSstr);
+#endif
+                        }
+                    break;
+                    case 3:
+                        if((((uint32_t)delayMSstr.toInt())>=((uint32_t)MOTION_READ_MIN_INTERVAL))
+                        && (((uint32_t)delayMSstr.toInt())<=((uint32_t)SENSORS_READ_MAX_INTERVAL)))
+                        {
+                            motion_delay_req = delayMSstr.toInt();
+#ifdef SERIAL_DEBUG
+                            Serial.print("Motion period (ms): ");
+                            Serial.println(motion_delay_req);
+#endif
+                        }
+                        else
+                        {
+                            motion_delay_req = (uint32_t)MOTION_READ_MIN_INTERVAL;
+#ifdef SERIAL_DEBUG
+                            Serial.print("Waring: Invalid motion period found at SD card: ");
+                            Serial.println(delayMSstr);
+#endif
+                        }
+                    break;
+                    case 4:
+                        if((((uint32_t)delayMSstr.toInt())>=((uint32_t)LIGHT_READ_MIN_INTERVAL))
+                        && (((uint32_t)delayMSstr.toInt())<=((uint32_t)SENSORS_READ_MAX_INTERVAL)))
+                        {
+                            light_delay_req = delayMSstr.toInt();
+#ifdef SERIAL_DEBUG
+                            Serial.print("Motion period (ms): ");
+                            Serial.println(light_delay_req);
+#endif
+                        }
+                        else
+                        {
+                            light_delay_req = (uint32_t)LIGHT_READ_MIN_INTERVAL;
+#ifdef SERIAL_DEBUG
+                            Serial.print("Waring: Invalid light period found at SD card: ");
+                            Serial.println(delayMSstr);
+#endif
+                        }
+                    break;
+                    case 5:
+                        if((((uint32_t)delayMSstr.toInt())>=((uint32_t)WINDOWS_READ_MIN_INTERVAL))
+                        && (((uint32_t)delayMSstr.toInt())<=((uint32_t)SENSORS_READ_MAX_INTERVAL)))
+                        {
+                            windows_delay_req = delayMSstr.toInt();
+#ifdef SERIAL_DEBUG
+                            Serial.print("Motion period (ms): ");
+                            Serial.println(light_delay_req);
+#endif
+                        }
+                        else
+                        {
+                            windows_delay_req = (uint32_t)WINDOWS_READ_MIN_INTERVAL;
+#ifdef SERIAL_DEBUG
+                            Serial.print("Waring: Invalid windows period found at SD card: ");
+                            Serial.println(delayMSstr);
+#endif
+                        }
+                    break;
+                    case 6:
+                    #ifdef SERIAL_DEBUG
+                                                Serial.println("Reached end of file!");
+                    #endif
+                    break;
+                    default:
+#ifdef SERIAL_DEBUG
+                        Serial.println("Warning: Reached an acquisition period configuration that wasn't supose.");
+                        Serial.print("configuration cntr: ");
+                        Serial.println(tmp_cntr);
+#endif
+
+                    break;
+                }
+                if(tmp_cntr == ((uint8_t)SENSOR_MODULES_TOTAL + 1))
+                {
+#ifdef SERIAL_DEBUG
+                    Serial.println("Warning: File had more values to read, but sensors total was reached!");
+#endif
+                    break;
+                }
             }
-            else
+            if(tmp_cntr < (uint8_t)SENSOR_MODULES_TOTAL)
             {
-                delayMsRequested = (uint32_t)SENSORS_READ_MIN_INTERVAL;
-                delayMs = delayMsRequested;
-#ifdef SERIAL_DEBUG
-                Serial.print("Waring: Invalid delay found at SD card: ");
-                Serial.print(delayMSstr);
-                Serial.println("ms");
-#endif
+                switch(tmp_cntr)
+                {
+                    case 1:
+                        co2_delay_req = (uint32_t)CO2_READ_MIN_INTERVAL;
+                        current_delay_req = (uint32_t)CURRENT_READ_MIN_INTERVAL;
+                        motion_delay_req = (uint32_t)MOTION_READ_MIN_INTERVAL;
+                        light_delay_req = (uint32_t)LIGHT_READ_MIN_INTERVAL;
+                        windows_delay_req = (uint32_t)WINDOWS_READ_MIN_INTERVAL;
+                    break;
+                    case 2:
+                        current_delay_req = (uint32_t)CURRENT_READ_MIN_INTERVAL;
+                        motion_delay_req = (uint32_t)MOTION_READ_MIN_INTERVAL;
+                        light_delay_req = (uint32_t)LIGHT_READ_MIN_INTERVAL;
+                        windows_delay_req = (uint32_t)WINDOWS_READ_MIN_INTERVAL;
+                    break;
+                    case 3:
+                        motion_delay_req = (uint32_t)MOTION_READ_MIN_INTERVAL;
+                        light_delay_req = (uint32_t)LIGHT_READ_MIN_INTERVAL;
+                        windows_delay_req = (uint32_t)WINDOWS_READ_MIN_INTERVAL;
+                    break;
+                    case 4:
+                        light_delay_req = (uint32_t)LIGHT_READ_MIN_INTERVAL;
+                        windows_delay_req = (uint32_t)WINDOWS_READ_MIN_INTERVAL;
+                    break;
+                    case 5:
+                        windows_delay_req = (uint32_t)WINDOWS_READ_MIN_INTERVAL;
+                    break;
+                    default:
+                    break;
+                }
             }
             config_file_opened=true;
             config_file.close();
@@ -165,7 +302,11 @@ void setup() {
             config_file = SD.open(config_file_name, FILE_WRITE);
             if (config_file)
             {
-              config_file.print((uint16_t)SENSORS_READ_MIN_INTERVAL);
+              config_file.println((uint16_t)CO2_READ_MIN_INTERVAL);
+              config_file.println((uint16_t)CURRENT_READ_MIN_INTERVAL);
+              config_file.println((uint16_t)MOTION_READ_MIN_INTERVAL);
+              config_file.println((uint16_t)LIGHT_READ_MIN_INTERVAL);
+              config_file.println((uint16_t)WINDOWS_READ_MIN_INTERVAL);
               config_file.close();
             }
             else
@@ -173,11 +314,10 @@ void setup() {
 #ifdef SERIAL_DEBUG
                 Serial.println("Error creating config file!");
 #endif
+                config_file_opened=false;
             }
-#ifdef SERIAL_DEBUG
-            Serial.println("Error: can't open configuration file!!!");
-#endif
-            config_file_opened=false;
+            config_file_opened=true;
+            config_file.close();
         }
 #ifdef SERIAL_DEBUG
         Serial.print("Logging interval: ");
@@ -231,10 +371,11 @@ void setup() {
     Serial.println("ms");
   }
 #endif
+co2_millis_start = current_millis_start = motion_millis_start = light_millis_start = windows_millis_start = 0;
 }
 
 void loop() {
-    millis_start = co2_millis_start = current_millis_start = motion_millis_start = light_millis_start = windows_millis_start = millis();
+    millis_start = millis();
 
     digitalWrite(ACTIVITY_LED_PIN,1);
     uint32_t millis_temp = millis();
@@ -474,26 +615,30 @@ void loop() {
 
 void sd_card_init(void)
 {
-  uint8_t sd_card_failures = 0;
-  while(sd_card_failures < SD_MAX_TRIES)
-  {
-    sd_card_failures++;
-    if (!SD.begin(SD_CHIP_SEL))
+    uint8_t sd_card_failures = 0;
+
+    pinMode(SD_CHIP_SEL, OUTPUT);
+    digitalWrite(SD_CHIP_SEL, HIGH);
+
+    while(sd_card_failures < SD_MAX_TRIES)
     {
-#ifdef SERIAL_DEBUG
-       Serial.print("Card failed, or not present -> try ");
-       Serial.println(sd_card_failures);
-#endif
-       sd_present=false;
-       delay(500);
-    }
-    else
-    {
-#ifdef SERIAL_DEBUG
-        Serial.println("SD card initialized.");
-#endif
-        sd_present=true;
-        break;
+        sd_card_failures++;
+        if (!SD.begin(SD_CHIP_SEL))
+        {
+    #ifdef SERIAL_DEBUG
+           Serial.print("Card failed, or not present -> try ");
+           Serial.println(sd_card_failures);
+    #endif
+           sd_present=false;
+           delay(500);
+        }
+        else
+        {
+    #ifdef SERIAL_DEBUG
+            Serial.println("SD card initialized.");
+    #endif
+            sd_present=true;
+            break;
         }
     }
 }
@@ -598,21 +743,20 @@ void log_sd(String file_name, String data)
 {
     if(sd_present)
     {
-        Serial.println("Logged data:");
         log_file = SD.open(file_name, FILE_WRITE);
         if (log_file) {
             log_file.println(data);
             log_file.close();
-            #ifdef SERIAL_DEBUG
-            Serial.println("CO2: "+data);
-            #endif
+#ifdef SERIAL_DEBUG
+            Serial.println(data);
+#endif
         }
         else {
             digitalWrite(ACTIVITY_LED_PIN,0);
             sd_present = false;
-            #ifdef SERIAL_DEBUG
+#ifdef SERIAL_DEBUG
             Serial.println("Error opening "+file_name);
-            #endif
+#endif
         }
     }
 }
