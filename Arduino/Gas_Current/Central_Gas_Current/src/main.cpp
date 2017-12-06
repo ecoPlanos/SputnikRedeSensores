@@ -32,6 +32,7 @@
 #define WINDOWS_READ_MIN_INTERVAL 750
 #define SENSORS_READ_MAX_INTERVAL 1800000
 #define SENSOR_MODULES_TOTAL 5
+
 #define ACTIVITY_LED_PIN 61
 
 #define SD_CHIP_SEL           4
@@ -54,14 +55,9 @@
 
 const String config_file_name="SPUTNIK.CFG";
 
-const char* ssid = "SSID";
-const char* password = "PASS";
-
 uint32_t millis_start, millis_end, setup_time, acquisition_time;
-uint32_t delayMs, delayMsRequested, temp_delay;
 uint32_t co2_delay_req, current_delay_req, motion_delay_req, light_delay_req, windows_delay_req;
 uint32_t co2_millis_start, current_millis_start, motion_millis_start, light_millis_start, windows_millis_start;
-uint32_t co2_millis_pass, current_millis_pass, motion_millis_pass, light_millis_pass, windows_millis_pass;
 
 uint8_t sd_present, log_file_opened, config_file_opened, report_file_opened;
 String co2_log_file_name, current_log_file_name, motion_log_file_name, light_log_file_name, windows_log_file_name, report_file_name;
@@ -98,7 +94,11 @@ void setup() {
     Serial1.begin(9600);
     remote_data_received = 0;
 
-    co2_delay_req = current_delay_req = motion_delay_req = light_delay_req = windows_delay_req = (uint32_t)SENSORS_READ_MIN_INTERVAL;
+    co2_delay_req = (uint32_t)CO2_READ_MIN_INTERVAL;
+    current_delay_req = (uint32_t)CURRENT_READ_MIN_INTERVAL;
+    motion_delay_req = (uint32_t)MOTION_READ_MIN_INTERVAL;
+    light_delay_req = (uint32_t)LIGHT_READ_MIN_INTERVAL;
+    windows_delay_req = (uint32_t)WINDOWS_READ_MIN_INTERVAL;
 
 #ifdef SERIAL_DEBUG
     Serial.println("-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-");
@@ -156,7 +156,6 @@ void setup() {
                         }
                         else
                         {
-                            co2_delay_req = (uint32_t)CO2_READ_MIN_INTERVAL;
 #ifdef SERIAL_DEBUG
                             Serial.print("Waring: Invalid CO2 period found at SD card: ");
                             Serial.println(delayMSstr);
@@ -175,7 +174,6 @@ void setup() {
                         }
                         else
                         {
-                            current_delay_req = (uint32_t)CURRENT_READ_MIN_INTERVAL;
 #ifdef SERIAL_DEBUG
                             Serial.print("Waring: Invalid current period found at SD card: ");
                             Serial.println(delayMSstr);
@@ -194,7 +192,6 @@ void setup() {
                         }
                         else
                         {
-                            motion_delay_req = (uint32_t)MOTION_READ_MIN_INTERVAL;
 #ifdef SERIAL_DEBUG
                             Serial.print("Waring: Invalid motion period found at SD card: ");
                             Serial.println(delayMSstr);
@@ -213,7 +210,6 @@ void setup() {
                         }
                         else
                         {
-                            light_delay_req = (uint32_t)LIGHT_READ_MIN_INTERVAL;
 #ifdef SERIAL_DEBUG
                             Serial.print("Waring: Invalid light period found at SD card: ");
                             Serial.println(delayMSstr);
@@ -232,7 +228,6 @@ void setup() {
                         }
                         else
                         {
-                            windows_delay_req = (uint32_t)WINDOWS_READ_MIN_INTERVAL;
 #ifdef SERIAL_DEBUG
                             Serial.print("Waring: Invalid windows period found at SD card: ");
                             Serial.println(delayMSstr);
@@ -263,36 +258,21 @@ void setup() {
             }
             if(tmp_cntr < (uint8_t)SENSOR_MODULES_TOTAL)
             {
-                switch(tmp_cntr)
-                {
-                    case 1:
-                        co2_delay_req = (uint32_t)CO2_READ_MIN_INTERVAL;
-                        current_delay_req = (uint32_t)CURRENT_READ_MIN_INTERVAL;
-                        motion_delay_req = (uint32_t)MOTION_READ_MIN_INTERVAL;
-                        light_delay_req = (uint32_t)LIGHT_READ_MIN_INTERVAL;
-                        windows_delay_req = (uint32_t)WINDOWS_READ_MIN_INTERVAL;
-                    break;
-                    case 2:
-                        current_delay_req = (uint32_t)CURRENT_READ_MIN_INTERVAL;
-                        motion_delay_req = (uint32_t)MOTION_READ_MIN_INTERVAL;
-                        light_delay_req = (uint32_t)LIGHT_READ_MIN_INTERVAL;
-                        windows_delay_req = (uint32_t)WINDOWS_READ_MIN_INTERVAL;
-                    break;
-                    case 3:
-                        motion_delay_req = (uint32_t)MOTION_READ_MIN_INTERVAL;
-                        light_delay_req = (uint32_t)LIGHT_READ_MIN_INTERVAL;
-                        windows_delay_req = (uint32_t)WINDOWS_READ_MIN_INTERVAL;
-                    break;
-                    case 4:
-                        light_delay_req = (uint32_t)LIGHT_READ_MIN_INTERVAL;
-                        windows_delay_req = (uint32_t)WINDOWS_READ_MIN_INTERVAL;
-                    break;
-                    case 5:
-                        windows_delay_req = (uint32_t)WINDOWS_READ_MIN_INTERVAL;
-                    break;
-                    default:
-                    break;
-                }
+#ifdef SERIAL_DEBUG
+                Serial.print("Warning: missing some modules period configuration! (");
+                Serial.print(tmp_cntr);
+                Serial.print("/");
+                Serial.print(SENSOR_MODULES_TOTAL);
+                Serial.println(")");
+                Serial.println("");
+                Serial.println("Applyed periods:");
+                Serial.println(co2_delay_req);
+                Serial.println(current_delay_req);
+                Serial.println(motion_delay_req);
+                Serial.println(light_delay_req);
+                Serial.println(windows_delay_req);
+                Serial.println("");
+#endif
             }
             config_file_opened=true;
             config_file.close();
@@ -302,11 +282,11 @@ void setup() {
             config_file = SD.open(config_file_name, FILE_WRITE);
             if (config_file)
             {
-              config_file.println((uint16_t)CO2_READ_MIN_INTERVAL);
-              config_file.println((uint16_t)CURRENT_READ_MIN_INTERVAL);
-              config_file.println((uint16_t)MOTION_READ_MIN_INTERVAL);
-              config_file.println((uint16_t)LIGHT_READ_MIN_INTERVAL);
-              config_file.println((uint16_t)WINDOWS_READ_MIN_INTERVAL);
+              config_file.println((uint32_t)CO2_READ_MIN_INTERVAL);
+              config_file.println((uint32_t)CURRENT_READ_MIN_INTERVAL);
+              config_file.println((uint32_t)MOTION_READ_MIN_INTERVAL);
+              config_file.println((uint32_t)LIGHT_READ_MIN_INTERVAL);
+              config_file.println((uint32_t)WINDOWS_READ_MIN_INTERVAL);
               config_file.close();
             }
             else
@@ -319,28 +299,8 @@ void setup() {
             config_file_opened=true;
             config_file.close();
         }
-#ifdef SERIAL_DEBUG
-        Serial.print("Logging interval: ");
-        Serial.println(delayMs);
-#endif
-        report_file = SD.open(report_file_name, FILE_WRITE);
-        if (report_file) {
-            report_file.print("Logging interval: ");
-            report_file.println(delayMs);
-            report_file.close();
-            report_file_opened=true;
-        }
-        else
-        {
-#ifdef SERIAL_DEBUG
-            Serial.println("Error: can't open system log file!!!");
-#endif
-            report_file_opened=false;
-            report_file.close();
-        }
     }
   delay(INITIAL_DELAY);
-  //  Initialize Gas Sensors
 
   sputnikGasInit();
   sputnikCurrentInit();
@@ -398,6 +358,7 @@ void loop() {
 
     if(calc_elapsed_time(co2_millis_start,millis_temp) >= co2_delay_req)
     {
+        co2_millis_start = millis();
         co2_sensors_awake();
         t = rtc.getTime();
         check_t();
@@ -452,6 +413,7 @@ void loop() {
 
     if(calc_elapsed_time(current_millis_start,millis_temp) >= current_delay_req)
     {
+        current_millis_start = millis();
         t = rtc.getTime();
         check_t();
         current_sd_data_string = String(String(t.year)+","+String(t.mon)+","+String(t.date)+","+String(t.hour)+":"+String(t.min)+":"+String(t.sec));
@@ -548,31 +510,42 @@ void loop() {
     }
 
 #ifdef SERIAL_DEBUG
-    Serial.println("------------------------------------");
-    Serial.println("---------------REMOTE---------------");
-    Serial.println("------------------------------------");
-
     switch(remote_data_received)
     {
         case 0x01:
+            Serial.println("------------------------------------");
+            Serial.println("---------------REMOTE---------------");
+            Serial.println("------------------------------------");
             Serial.print("Motion: ");
             Serial.println(motion_sd_data_string);
         break;
         case 0x02:
+            Serial.println("------------------------------------");
+            Serial.println("---------------REMOTE---------------");
+            Serial.println("------------------------------------");
             Serial.print("Light: ");
             Serial.println(light_sd_data_string);
         break;
         case 0x03:
+            Serial.println("------------------------------------");
+            Serial.println("---------------REMOTE---------------");
+            Serial.println("------------------------------------");
             Serial.print("Motion: ");
             Serial.println(motion_sd_data_string);
             Serial.print("Light: ");
             Serial.println(light_sd_data_string);
         break;
         case 0x04:
+            Serial.println("------------------------------------");
+            Serial.println("---------------REMOTE---------------");
+            Serial.println("------------------------------------");
             Serial.print("Windows: ");
             Serial.println(windows_sd_data_string);
         break;
         case 0x07:
+            Serial.println("------------------------------------");
+            Serial.println("---------------REMOTE---------------");
+            Serial.println("------------------------------------");
             Serial.print("Motion: ");
             Serial.println(motion_sd_data_string);
             Serial.print("Light: ");
@@ -581,35 +554,36 @@ void loop() {
             Serial.println(windows_sd_data_string);
         break;
         default:
+        break;
     }
-    remote_data_received = 0;
 #endif
+remote_data_received = 0;
 
 #ifdef SERIAL_DEBUG
-    millis_end = millis();
-    Serial.print("millis_start: ");
-    Serial.println(millis_start);
-    Serial.print("millis_end: ");
-    Serial.println(millis_end);
-
-    acquisition_time = calc_elapsed_time(millis_start,millis_end);
-
-    Serial.print("Acquisition time: ");
-    if(acquisition_time >= 60000)
-    {
-        Serial.print((uint8_t) (acquisition_time/60000));
-        Serial.println("m");
-    }
-    else if(acquisition_time >= 1000)
-    {
-        Serial.print((uint8_t) (acquisition_time/1000));
-        Serial.println("s");
-    }
-    else
-    {
-      Serial.print(acquisition_time);
-        Serial.println("ms");
-    }
+    // millis_end = millis();
+    // Serial.print("millis_start: ");
+    // Serial.println(millis_start);
+    // Serial.print("millis_end: ");
+    // Serial.println(millis_end);
+    //
+    // acquisition_time = calc_elapsed_time(millis_start,millis_end);
+    //
+    // Serial.print("Acquisition time: ");
+    // if(acquisition_time >= 60000)
+    // {
+    //     Serial.print((uint8_t) (acquisition_time/60000));
+    //     Serial.println("m");
+    // }
+    // else if(acquisition_time >= 1000)
+    // {
+    //     Serial.print((uint8_t) (acquisition_time/1000));
+    //     Serial.println("s");
+    // }
+    // else
+    // {
+    //   Serial.print(acquisition_time);
+    //     Serial.println("ms");
+    // }
 #endif
 }
 
@@ -665,9 +639,8 @@ void log_files_create()
         if (log_file) {
 #ifdef SERIAL_DEBUG
             Serial.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC)");
-#else
-            log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC)");
 #endif
+            log_file.println("year,month,day,time,MG811 (ADC-12Bit),MQ135 (ADC-12Bit),CCS188 (CO2),CCS188 (TVOC)");
             log_file.close();
         }
         else
@@ -680,9 +653,8 @@ void log_files_create()
         if (log_file) {
 #ifdef SERIAL_DEBUG
             Serial.println("year,month,day,time,ACS770 (Current RMS (A)),ACS712 (Current RMS (A)),PA3208 (Current RMS (A)),SCT0-13 (Current RMS (A))");
-#else
-            log_file.println("year,month,day,time,ACS770 (Current RMS (A)),ACS712 (Current RMS (A)),PA3208 (Current RMS (A)),SCT0-13 (Current RMS (A))");
 #endif
+            log_file.println("year,month,day,time,ACS770 (Current RMS (A)),ACS712 (Current RMS (A)),PA3208 (Current RMS (A)),SCT0-13 (Current RMS (A))");
             log_file.close();
         }
         else
@@ -695,9 +667,8 @@ void log_files_create()
         if (log_file) {
 #ifdef SERIAL_DEBUG
             Serial.println("year,month,day,time,SEN0192 (nr),SE-10 (nr),ZRE200GE (nr),EKMB1101111 (nr)");
-#else
-            log_file.println("year,month,day,time,SEN0192 (nr),SE-10 (nr),ZRE200GE (nr),EKMB1101111 (nr)");
 #endif
+            log_file.println("year,month,day,time,SEN0192 (nr),SE-10 (nr),ZRE200GE (nr),EKMB1101111 (nr)");
             log_file.close();
         }
         else
@@ -710,9 +681,8 @@ void log_files_create()
         if (log_file) {
 #ifdef SERIAL_DEBUG
             Serial.println("year,month,day,time,TSL2561 data0,TSL2561 data1,TSL2561 lux,SI1145 visible,SI1145 IR,SI1145 UV,ISL29125 Red,ISL29125 Green,ISL29125 Blue");
-#else
-            log_file.println("year,month,day,time,TSL2561 data0,TSL2561 data1,TSL2561 lux,SI1145 visible,SI1145 IR,SI1145 UV,ISL29125 Red,ISL29125 Green,ISL29125 Blue");
 #endif
+            log_file.println("year,month,day,time,TSL2561 data0,TSL2561 data1,TSL2561 lux,SI1145 visible,SI1145 IR,SI1145 UV,ISL29125 Red,ISL29125 Green,ISL29125 Blue");
             log_file.close();
         }
         else
@@ -725,9 +695,8 @@ void log_files_create()
         if (log_file) {
 #ifdef SERIAL_DEBUG
             Serial.println("year,month,day,time,HC-SRO4 (cm),URM37 (cm),LV-EZ (cm),LV-EZ (mv),itg3200_gx,itg3200_gy,itg3200_gz,itg3200_x_move_count,itg3200_y_move_count,itg3200_z_move_count,itg3200_detected,lis3dh_ax,lis3dh_ay,lis3dh_az,lis3dh_x_move_count,lis3dh_y_move_count,lis3dh_z_move_count,lis3dh_detected");
-#else
-            log_file.println("year,month,day,time,HC-SRO4 (cm),URM37 (cm),LV-EZ (cm),LV-EZ (mv),itg3200_gx,itg3200_gy,itg3200_gz,itg3200_x_move_count,itg3200_y_move_count,itg3200_z_move_count,itg3200_detected,lis3dh_ax,lis3dh_ay,lis3dh_az,lis3dh_x_move_count,lis3dh_y_move_count,lis3dh_z_move_count,lis3dh_detected");
 #endif
+            log_file.println("year,month,day,time,HC-SRO4 (cm),URM37 (cm),LV-EZ (cm),LV-EZ (mv),itg3200_gx,itg3200_gy,itg3200_gz,itg3200_x_move_count,itg3200_y_move_count,itg3200_z_move_count,itg3200_detected,lis3dh_ax,lis3dh_ay,lis3dh_az,lis3dh_x_move_count,lis3dh_y_move_count,lis3dh_z_move_count,lis3dh_detected");
             log_file.close();
         }
         else
